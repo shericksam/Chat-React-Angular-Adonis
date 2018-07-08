@@ -8,6 +8,11 @@ $(document).ready(function(){
 		$("#profile").toggleClass("expanded");
 		$("#contacts").toggleClass("expanded");
 	});
+
+	$(".contact").click(function(){
+		$(".contact").removeClass("active");
+		$(this).addClass("active");
+	});
 	
 	$("#status-options ul li").click(function() {
 		$("#profile-img").removeClass();

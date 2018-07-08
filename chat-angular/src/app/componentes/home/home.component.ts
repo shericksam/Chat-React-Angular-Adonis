@@ -68,6 +68,10 @@ export class HomeComponent implements OnInit {
     
   }
 
+  selectContact(event){
+    console.log("Se eligio: ",event.target);
+  }
+
   
   
   public logout(): void{
