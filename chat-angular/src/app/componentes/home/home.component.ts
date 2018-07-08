@@ -21,18 +21,24 @@ export class HomeComponent implements OnInit {
   nombre:string;
   ws = Ws('ws://localhost:3333')
   chat;
+  contactSelected:string;
 
   constructor(
     private storageService: StorageService,
     private authenticationService: AuthenticationService
   ) {
     this.nombre = "Irving crespo"
+    this.contactSelected = "http://emilcarlsson.se/assets/harveyspecter.png";
    }
 
   ngOnInit() {
     this.ws.connect()
-    this.chat = this.ws.subscribe('chat')
-    this.chat = this.ws.subscribe('chat:grupo1')
+    //this.ws.subscribe('chat:grupo1')
+    this.ws.subscribe('chat:global')
+    
+
+    this.chat = this.ws.getSubscription("chat:global");
+    console.log("SUBSCRIPTION: ",this.ws.getSubscription("chat"));
 
     this.chat.on('receive-message',(data) => {
       console.log(data);
@@ -57,10 +63,17 @@ export class HomeComponent implements OnInit {
       //$('.message-input input').val(null);
       $('.contact.active .preview').html('<span>You: </span>' + this.mensaje);
       $(".messages").animate({ scrollTop: $(document).height() }, "fast");
-      console.log("Mensaje: ",this.mensaje);
-      this.chat.emit('newMessage',{
+      console.log("WS: ",this.ws);
+      
+      console.log(this.ws.getSubscription('chat:global'));
+
+      this.ws.getSubscription('chat:global').emit('newMessage',{
         mensaje:this.mensaje
       });
+
+      //this.chat.emit('newMessage',{
+      //  mensaje:this.mensaje
+      //});
       //this.newMessage({mensaje:this.mensaje})
       this.mensaje = ""
       
@@ -69,7 +82,9 @@ export class HomeComponent implements OnInit {
   }
 
   selectContact(event){
+    
     console.log("Se eligio: ",event.target);
+
   }
 
   

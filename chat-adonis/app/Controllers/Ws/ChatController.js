@@ -20,8 +20,8 @@ class ChatController {
 
   }
 
-  onNewMessage(){
-    
+  onNewMessage(data){
+    this.socket.broadcast("receive-message",data);
   }
 
 }
