@@ -22,6 +22,7 @@ export class HomeComponent implements OnInit {
   ws = Ws('ws://localhost:3333')
   chat;
   contactSelected:string;
+  isConnected = false;
 
   constructor(
     private storageService: StorageService,
@@ -33,18 +34,18 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {
     this.ws.connect()
-    //this.ws.subscribe('chat:grupo1')
-    this.ws.subscribe('chat:global')
-    
-
-    this.chat = this.ws.getSubscription("chat:global");
-    console.log("SUBSCRIPTION: ",this.ws.getSubscription("chat"));
-
-    this.chat.on('receive-message',(data) => {
-      console.log(data);
-      this.newMessage(data)
-    });
-
+    this.ws.on('open', () => {
+      this.isConnected = true
+      this.ws.subscribe('chat:global')
+      this.chat = this.ws.getSubscription("chat:global");
+      this.chat.on('receive-message',(data) => {
+        console.log(data);
+        this.newMessage(data)
+      });
+    })
+    this.ws.on('close', () => {
+      this.isConnected = false
+    })
     this.user = this.storageService.getCurrentUser();
   }
 
@@ -66,10 +67,16 @@ export class HomeComponent implements OnInit {
       console.log("WS: ",this.ws);
       
       console.log(this.ws.getSubscription('chat:global'));
+      if(this.isConnected){
+        this.ws.getSubscription('chat:global').emit('newMessage',{
+          mensaje:this.mensaje,
+          from:1,
+          to:2
+        });
+      }else{
 
-      this.ws.getSubscription('chat:global').emit('newMessage',{
-        mensaje:this.mensaje
-      });
+      }
+     
 
       //this.chat.emit('newMessage',{
       //  mensaje:this.mensaje
