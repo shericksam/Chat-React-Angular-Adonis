@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
-import {Validators, FormGroup, FormBuilder} from "@angular/forms";
-import {LoginObject} from "./shared/login-object.model";
-import {Router} from "@angular/router";
+import { Validators, FormGroup, FormBuilder } from "@angular/forms";
+import { LoginObject } from "./shared/login-object.model";
+import { Router } from "@angular/router";
 import { AuthenticationService } from "../../servicios/authentication/authentication.service";
 import { StorageService } from "../../servicios/storage/storage.service";
 import {MatCardModule} from '@angular/material/card';

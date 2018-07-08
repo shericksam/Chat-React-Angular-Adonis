@@ -8,20 +8,26 @@ import { map, filter, catchError, mergeMap } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class AuthenticationService {
+
   constructor(private http: Http) {}
-  private basePath = '/api/authenticate/';
+
+  // private basePath = '/api/authenticate/';
+  private basePath = 'http://127.0.0.1/api/authenticate/';
+
   login(loginObj: LoginObject): Observable<Session> {
-  return this.http.post(this.basePath + 'login', loginObj).pipe(
-    map(this.extractData)
-  );
+    return this.http.post(this.basePath + 'login', loginObj).pipe(
+      map(this.extractData)
+    );
   }
+
   logout(): Observable<Boolean> {
-  return this.http.post(this.basePath + 'logout', {}).pipe(
-    map(this.extractData)
-  );
+    return this.http.post(this.basePath + 'logout', {}).pipe(
+      map(this.extractData)
+    );
   }
+
   private extractData(res: Response) {
-  let body = res.json();
-  return body;
+    let body = res.json();
+    return body;
   }
 }
