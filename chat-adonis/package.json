@@ -24,7 +24,8 @@
     "@adonisjs/framework": "^5.0.7",
     "@adonisjs/ignitor": "^2.0.6",
     "@adonisjs/lucid": "^5.0.4",
-    "@adonisjs/websocket": "^1.0.10"
+    "@adonisjs/websocket": "^1.0.10",
+    "pg": "^7.4.3"
   },
   "devDependencies": {},
   "autoload": {
