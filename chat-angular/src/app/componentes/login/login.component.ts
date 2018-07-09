@@ -13,10 +13,14 @@ import {MatCardModule} from '@angular/material/card';
 })
 export class LoginComponent implements OnInit {
   public loginForm: FormGroup;
+  public registerForm: FormGroup;
   public submitted: Boolean = false;
+  public submittedReg: Boolean = false;
+  public crear: Boolean = false;
   public error: {code: number, message: string} = null;
 
   constructor(private formBuilder: FormBuilder,
+              private formBuilderR: FormBuilder,
               private authenticationService: AuthenticationService,
               private storageService: StorageService,
               private router: Router) { }
@@ -24,6 +28,13 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
     this.loginForm = this.formBuilder.group({
       username: ['', Validators.required],
+      password: ['', Validators.required],
+    })
+    this.registerForm = this.formBuilderR.group({
+      username: ['', Validators.required],
+      nombre: ['', Validators.required],
+      apellido: ['', Validators.required],
+      email: ['', Validators.required],
       password: ['', Validators.required],
     })
   }
@@ -43,4 +54,31 @@ export class LoginComponent implements OnInit {
     this.storageService.setCurrentSession(data);
     this.router.navigate(['/home']);
   }
+
+  public data;
+  selectImage(){
+    var input = document.createElement('input');
+    input.type = 'file';
+    var dataa;
+    input.addEventListener("change", function(){
+      let dataArray = new FormData();
+      dataArray.append('file', input.files[0]);
+      // console.log("in fun", dataArray);
+      // console.log("in fun", input.files[0]);
+      var reader = new FileReader();
+
+      reader.onload = function(e) {
+        // $('#blah').attr('src', );
+        
+        console.log(e.target.result);
+      }
+
+      reader.readAsDataURL(input.files[0]);
+      dataa = reader.result;
+      console.log("reader", reader.result);
+    });
+    this.data = dataa;
+    input.click();
+  }
+
 }

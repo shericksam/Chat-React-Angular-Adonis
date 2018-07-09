@@ -11,8 +11,8 @@ export class AuthenticationService {
 
   constructor(private http: Http) {}
 
-  // private basePath = '/api/authenticate/';
-  private basePath = 'http://127.0.0.1/api/authenticate/';
+  private basePath = '/api/authenticate/';
+  // private basePath = 'http://127.0.0.1/api/authenticate/';
 
   login(loginObj: LoginObject): Observable<Session> {
     return this.http.post(this.basePath + 'login', loginObj).pipe(

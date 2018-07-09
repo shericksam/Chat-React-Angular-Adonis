@@ -1,62 +1,56 @@
-<!-- <div class="aligner">
-    <mat-card class="aligner-center-item">
-        <mat-card-title>
-            Login Form
-        </mat-card-title>
-        <mat-card-content>
-            <form id="login-form" #lForm="ngForm" [formGroup]="loginForm" (ngSubmit)="submitLogin()" novalidate>
-                <div style="width: 100%; margin-bottom: 10px;" [ngClass]="{'mat-input-invalid': submitted && error?.code == 1}">
-                    <input type="text" formControlName="username" placeholder="Username" />
-                    <mat-hint style="color: red;" *ngIf="submitted && error?.code == 1 && !loginForm.controls.username.hasError('required')">{{error.message}}</mat-hint>
-                    <mat-hint style="color: red;" *ngIf="submitted && loginForm.controls.username.hasError('required')">Campo requerido</mat-hint>
-                </div>
-                <div style="width: 100%;" [ngClass]="{'mat-input-invalid': submitted && error?.code == 2}">
-                    <input type="password" formControlName="password" placeholder="Password" />
-                    <mat-hint style="color: red;" *ngIf="submitted && error?.code == 2 && !loginForm.controls.password.hasError('required')">{{error.message}}</mat-hint>
-                    <mat-hint style="color: red;" *ngIf="submitted && loginForm.controls.password.hasError('required')">Campo requerido</mat-hint>
-                </div>
-            </form>
-        </mat-card-content>
-        <mat-card-actions style="text-align: right;">
-            <button md-raised-button type="submit" form="login-form"> Sign In</button>
-        </mat-card-actions>
-    </mat-card>
-</div> -->
-
 <div class="login-page">
     <div class="form">
-        <form class="register-form">
-            <mat-form-field style="width: 100%; margin-bottom: 10px;" [ngClass]="{'mat-input-invalid': submitted && error?.code == 1}">
+        <form class="register-form" *ngIf="crear" id="register-form" #lForm="ngForm" [formGroup]="registerForm" (ngSubmit)="submitRegister()" novalidate>
+            <div (click)="selectImage()" tabindex="0" class="el-upload el-upload--text">
+                <i class="el-icon-plus avatar-uploader-icon"></i>
+                <img [src]="data" alt="">
+                <input type="file" name="file" class="el-upload__input">
+            </div>
+            <br>
+            <div style="width: 100%; margin-bottom: 10px;" [ngClass]="{'mat-input-invalid': submittedReg && error?.code == 1}">
+                <mat-hint style="color: red;" *ngIf="submittedReg && error?.code == 1 && !registerForm.controls.nombre.hasError('required')">{{error.message}}</mat-hint>
+                <mat-hint style="color: red;" *ngIf="submittedReg && registerForm.controls.nombre.hasError('required')">Campo requerido</mat-hint>
+                <input type="text" formControlName="nombre" placeholder="Nombre" />
+            </div>
+            <div style="width: 100%; margin-bottom: 10px;" [ngClass]="{'mat-input-invalid': submittedReg && error?.code == 1}">
+                <mat-hint style="color: red;" *ngIf="submittedReg && error?.code == 1 && !registerForm.controls.apellido.hasError('required')">{{error.message}}</mat-hint>
+                <mat-hint style="color: red;" *ngIf="submittedReg && registerForm.controls.apellido.hasError('required')">Campo requerido</mat-hint>
+                <input type="text" formControlName="apellido" placeholder="Apellido" />
+            </div>
+            <div style="width: 100%; margin-bottom: 10px;" [ngClass]="{'mat-input-invalid': submittedReg && error?.code == 1}">
+                <mat-hint style="color: red;" *ngIf="submittedReg && error?.code == 1 && !registerForm.controls.email.hasError('required')">{{error.message}}</mat-hint>
+                <mat-hint style="color: red;" *ngIf="submittedReg && registerForm.controls.email.hasError('required')">Campo requerido</mat-hint>
+                <input type="text" formControlName="email" placeholder="Correo" />
+            </div>
+            <div style="width: 100%; margin-bottom: 10px;" [ngClass]="{'mat-input-invalid': submittedReg && error?.code == 1}">
+                <mat-hint style="color: red;" *ngIf="submittedReg && error?.code == 1 && !registerForm.controls.username.hasError('required')">{{error.message}}</mat-hint>
+                <mat-hint style="color: red;" *ngIf="submittedReg && registerForm.controls.username.hasError('required')">Campo requerido</mat-hint>
                 <input type="text" formControlName="username" placeholder="Username" />
-                <mat-hint style="color: red;" *ngIf="submitted && error?.code == 1 && !loginForm.controls.username.hasError('required')">{{error.message}}</mat-hint>
-                <mat-hint style="color: red;" *ngIf="submitted && loginForm.controls.username.hasError('required')">Campo requerido</mat-hint>
-            </mat-form-field>
-            <mat-form-field style="width: 100%;" [ngClass]="{'mat-input-invalid': submitted && error?.code == 2}">
+            </div>
+            <div style="width: 100%;" [ngClass]="{'mat-input-invalid': submittedReg && error?.code == 2}">
                 <input type="password" formControlName="password" placeholder="Password" />
-                <mat-hint style="color: red;" *ngIf="submitted && error?.code == 2 && !loginForm.controls.password.hasError('required')">{{error.message}}</mat-hint>
-                <mat-hint style="color: red;" *ngIf="submitted && loginForm.controls.password.hasError('required')">Campo requerido</mat-hint>
-            </mat-form-field>
+                <mat-hint style="color: red;" *ngIf="submittedReg && error?.code == 2 && !registerForm.controls.password.hasError('required')">{{error.message}}</mat-hint>
+                <mat-hint style="color: red;" *ngIf="submittedReg && registerForm.controls.password.hasError('required')">Campo requerido</mat-hint>
+            </div>
             <!-- <input type="text" placeholder="name" />
             <input type="password" placeholder="password" />
             <input type="text" placeholder="email address" /> -->
-            <button>Registrar</button>
-            <p class="message">¿Estas registrado? <a href="#">Inicia sesion</a></p>
+            <button type="submit" form="register-form">Registrar</button>
+            <p class="message">¿Estas registrado? <a (click)="crear = false" href="javascript:">Inicia sesion</a></p>
         </form>
-        <form class="login-form" id="login-form" #lForm="ngForm" [formGroup]="loginForm" (ngSubmit)="submitLogin()" novalidate>
-            <mat-form-field style="width: 100%; margin-bottom: 10px;" [ngClass]="{'mat-input-invalid': submitted && error?.code == 1}">
-                <input type="text" formControlName="username" placeholder="Username" />
+        <form *ngIf="!crear" class="login-form" id="login-form" #lForm="ngForm" [formGroup]="loginForm" (ngSubmit)="submitLogin()" novalidate>
+            <div style="width: 100%; margin-bottom: 10px;" [ngClass]="{'mat-input-invalid': submitted && error?.code == 1}">
                 <mat-hint style="color: red;" *ngIf="submitted && error?.code == 1 && !loginForm.controls.username.hasError('required')">{{error.message}}</mat-hint>
                 <mat-hint style="color: red;" *ngIf="submitted && loginForm.controls.username.hasError('required')">Campo requerido</mat-hint>
-            </mat-form-field>
-            <mat-form-field style="width: 100%;" [ngClass]="{'mat-input-invalid': submitted && error?.code == 2}">
-                <input type="password" formControlName="password" placeholder="Password" />
+                <input type="text" formControlName="username" placeholder="Username" />
+            </div>
+            <div style="width: 100%;" [ngClass]="{'mat-input-invalid': submitted && error?.code == 2}">
                 <mat-hint style="color: red;" *ngIf="submitted && error?.code == 2 && !loginForm.controls.password.hasError('required')">{{error.message}}</mat-hint>
                 <mat-hint style="color: red;" *ngIf="submitted && loginForm.controls.password.hasError('required')">Campo requerido</mat-hint>
-            </mat-form-field>
-            <!-- <input type="text" placeholder="username" />
-            <input type="password" placeholder="password" /> -->
+                <input type="password" formControlName="password" placeholder="Password" />
+            </div>
             <button type="submit" form="login-form">login</button>
-            <p class="message">¿Sin registrar? <a href="#">Crea una cuenta</a></p>
+            <p class="message">¿Sin registrar? <a (click)="crear = true" href="javascript:">Crea una cuenta</a></p>
         </form>
     </div>
 </div>
