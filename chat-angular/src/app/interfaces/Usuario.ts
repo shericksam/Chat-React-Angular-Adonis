@@ -1,9 +1,10 @@
 interface Usuario {
     id: number;
-    photo:string;
+    foto:string;
     nombre: string;
     apellido: string;
     email: string;
     username: string;
     password?: string;
+    conectado: boolean;
 }

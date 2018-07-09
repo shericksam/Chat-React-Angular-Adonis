@@ -5,6 +5,7 @@ import { Router } from "@angular/router";
 import { AuthenticationService } from "../../servicios/authentication/authentication.service";
 import { StorageService } from "../../servicios/storage/storage.service";
 import {MatCardModule} from '@angular/material/card';
+import { IButton } from "selenium-webdriver";
 
 @Component({
   selector: 'app-login',
@@ -18,6 +19,7 @@ export class LoginComponent implements OnInit {
   public submittedReg: Boolean = false;
   public crear: Boolean = false;
   public error: {code: number, message: string} = null;
+  public imagen = false;
 
   constructor(private formBuilder: FormBuilder,
               private formBuilderR: FormBuilder,
@@ -50,43 +52,33 @@ export class LoginComponent implements OnInit {
     }
   }
   
+  public submitRegister(): void {
+    this.submittedReg = true;
+    this.error = null;
+    if(this.registerForm.valid){
+      this.authenticationService.login(new LoginObject(this.loginForm.value)).subscribe(
+        data => this.correctLogin(data),
+        error => this.error = JSON.parse(error._body)
+      )
+    }
+  }
+  
   private correctLogin(data: Session){
     this.storageService.setCurrentSession(data);
     this.router.navigate(['/home']);
   }
 
-  public data = ""; input = document.createElement('input');
-  selectImage(){
-    // this.input = document.createElement('input');
-    this.input.type = 'file';
-    this.input.onchange = this.chan;
-    // input.addEventListener("change", function(evt){
-      
-    // });
-    // this.data = dataa;
-    console.log(this.data);
-    this.input.click();
-  }
-
-  chan(evt){
+  selectImage(input){
+    console.log(input);
     
-    console.log("reader", evt);
-    this.data = evt.path[0].value;
-    console.log(this.data);
-    /* let dataArray = new FormData();
-      dataArray.append('file', this.input.files[0]);
-      // console.log("in fun", dataArray);
-      // console.log("in fun", input.files[0]);
+    let dataArray = new FormData();
+      dataArray.append('file', input.files[0]);
       var reader = new FileReader();
-
-      reader.onload = function(e) {
-        // $('#blah').attr('src', );
-        
-        console.log(e.target.result);
+      var funn= function(e) {
+        this.imagen = e.target.result;
       }
-
-      reader.readAsDataURL(this.input.files[0]);
-      this.data = reader.result;
-      // this.data */
+      reader.onload = funn.bind(this);
+      reader.readAsDataURL(input.files[0]);
   }
+
 }

@@ -1,10 +1,13 @@
 <div class="login-page">
     <div class="form">
         <form class="register-form" *ngIf="crear" id="register-form" #lForm="ngForm" [formGroup]="registerForm" (ngSubmit)="submitRegister()" novalidate>
-            <div (click)="selectImage()" tabindex="0" class="el-upload el-upload--text">
+            <div *ngIf="!imagen" (click)="photoInput.click()" tabindex="0" class="el-upload el-upload--text">
                 <i class="el-icon-plus avatar-uploader-icon"></i>
-                <img [src]="data" alt="">
-                <input type="file" name="file" class="el-upload__input">
+                <input #photoInput type="file" name="file" class="el-upload__input" (change)="selectImage(photoInput)">
+            </div>
+            <div *ngIf="imagen">
+                <img [src]="imagen" alt="">
+
             </div>
             <br>
             <div style="width: 100%; margin-bottom: 10px;" [ngClass]="{'mat-input-invalid': submittedReg && error?.code == 1}">
@@ -28,9 +31,9 @@
                 <input type="text" formControlName="username" placeholder="Username" />
             </div>
             <div style="width: 100%;" [ngClass]="{'mat-input-invalid': submittedReg && error?.code == 2}">
-                <input type="password" formControlName="password" placeholder="Password" />
                 <mat-hint style="color: red;" *ngIf="submittedReg && error?.code == 2 && !registerForm.controls.password.hasError('required')">{{error.message}}</mat-hint>
                 <mat-hint style="color: red;" *ngIf="submittedReg && registerForm.controls.password.hasError('required')">Campo requerido</mat-hint>
+                <input type="password" formControlName="password" placeholder="Password" />
             </div>
             <!-- <input type="text" placeholder="name" />
             <input type="password" placeholder="password" />

@@ -14,7 +14,6 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import { RegistrationComponent } from './componentes/registration/registration.component';
 
 import {MatInputModule} from '@angular/material';
-import { ImageUploadModule } from "angular2-image-upload";
 
 @NgModule({
   declarations: [
@@ -33,8 +32,7 @@ import { ImageUploadModule } from "angular2-image-upload";
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
-    MatInputModule,
-    ImageUploadModule.forRoot(),
+    MatInputModule
   ],
   providers: [],
   bootstrap: [AppComponent]

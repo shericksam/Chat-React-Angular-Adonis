@@ -26,8 +26,7 @@
                             "src/styles.css"
                         ],
                         "scripts": [
-                            "src/scripts/main.js",
-                            "./node_modules/ng-image-picker/ng-image-picker.js"
+                            "src/scripts/main.js"
                         ]
                     },
                     "configurations": {
