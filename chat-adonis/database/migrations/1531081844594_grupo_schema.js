@@ -6,6 +6,8 @@ class GrupoSchema extends Schema {
   up () {
     this.create('grupos', (table) => {
       table.increments()
+      table.string("nombre")
+      table.string("foto")
       table.timestamps()
     })
   }

@@ -18,3 +18,5 @@ const Route = use('Route')
 Route.get('/', ({ request }) => {
   return { greeting: 'Hello world in JSON' }
 })
+
+Route.resource('/conversacion','ConversacioneController');

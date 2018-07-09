@@ -19,7 +19,12 @@ export class HomeComponent implements OnInit {
   mensaje:string;
   title = 'app';
   nombre:string;
-  ws = Ws('ws://localhost:3333')
+  ws = Ws('ws://localhost:3333',{
+    query:{wsData:{msg:'hi'}},
+    transport: {
+      headers: { 'Cookie': 'foo=bar' }
+    }
+  })
   chat;
   contactSelected:string;
   isConnected = false;

@@ -11,6 +11,7 @@ const Ws = use('Ws')
 |
 */
 const globalMiddleware = [
+  'App/Middleware/Auth'
 ]
 
 
