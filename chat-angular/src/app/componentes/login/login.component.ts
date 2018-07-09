@@ -1,11 +1,10 @@
 import { Component, OnInit } from "@angular/core";
 import { Validators, FormGroup, FormBuilder } from "@angular/forms";
 import { LoginObject } from "./shared/login-object.model";
+import { RegisterObject } from "./shared/register-object.model";
 import { Router } from "@angular/router";
 import { AuthenticationService } from "../../servicios/authentication/authentication.service";
 import { StorageService } from "../../servicios/storage/storage.service";
-import {MatCardModule} from '@angular/material/card';
-import { IButton } from "selenium-webdriver";
 
 @Component({
   selector: 'app-login',
@@ -45,7 +44,7 @@ export class LoginComponent implements OnInit {
     this.submitted = true;
     this.error = null;
     if(this.loginForm.valid){
-      this.authenticationService.login(new LoginObject(this.loginForm.value)).subscribe(
+      this.authenticationService.register(new RegisterObject(this.loginForm.value)).subscribe(
         data => this.correctLogin(data),
         error => this.error = JSON.parse(error._body)
       )

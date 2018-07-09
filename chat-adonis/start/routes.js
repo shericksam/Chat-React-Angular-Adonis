@@ -15,6 +15,10 @@
 
 const Route = use('Route')
 
+Route.group(() => {
+    Route.resource('user', 'UsuarioController')
+}).prefix('api/v1')
+
 Route.get('/', ({ request }) => {
-  return { greeting: 'Hello world in JSON' }
+    return { greeting: 'Hello world in JSON' }
 })
