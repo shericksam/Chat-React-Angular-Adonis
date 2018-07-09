@@ -55,14 +55,26 @@ export class LoginComponent implements OnInit {
     this.router.navigate(['/home']);
   }
 
-  public data;
+  public data = ""; input = document.createElement('input');
   selectImage(){
-    var input = document.createElement('input');
-    input.type = 'file';
-    var dataa;
-    input.addEventListener("change", function(){
-      let dataArray = new FormData();
-      dataArray.append('file', input.files[0]);
+    // this.input = document.createElement('input');
+    this.input.type = 'file';
+    this.input.onchange = this.chan;
+    // input.addEventListener("change", function(evt){
+      
+    // });
+    // this.data = dataa;
+    console.log(this.data);
+    this.input.click();
+  }
+
+  chan(evt){
+    
+    console.log("reader", evt);
+    this.data = evt.path[0].value;
+    console.log(this.data);
+    /* let dataArray = new FormData();
+      dataArray.append('file', this.input.files[0]);
       // console.log("in fun", dataArray);
       // console.log("in fun", input.files[0]);
       var reader = new FileReader();
@@ -73,12 +85,8 @@ export class LoginComponent implements OnInit {
         console.log(e.target.result);
       }
 
-      reader.readAsDataURL(input.files[0]);
-      dataa = reader.result;
-      console.log("reader", reader.result);
-    });
-    this.data = dataa;
-    input.click();
+      reader.readAsDataURL(this.input.files[0]);
+      this.data = reader.result;
+      // this.data */
   }
-
 }
