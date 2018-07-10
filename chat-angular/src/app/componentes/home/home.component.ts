@@ -4,6 +4,7 @@ import { AuthenticationService } from '../../servicios/authentication/authentica
 import { FormsModule } from '@angular/forms';
 import Ws from '@adonisjs/websocket-client'
 import { ServiceApiService } from '../../servicios/server/service-api.service';
+import { map } from 'rxjs/operators';
 
 
 declare var jquery:any;
@@ -18,7 +19,7 @@ export class HomeComponent implements OnInit {
   public user: Usuario;
 
   private users:Usuario[];
-
+  private conversacion:Mensaje[];
   
   mensaje:string;
   title = 'app';
@@ -46,15 +47,17 @@ export class HomeComponent implements OnInit {
     this.services.usersService().subscribe(
       res=>{
         this.users = res;
-        console.log(res);
+        console.log("RESPUESTA: ",res);
       },
     error => {
 
     });
-
+    
+    this.user = JSON.parse(localStorage.getItem("currentUser")).user;
+    console.log("ID: ",this.user.id);
 
     this.ws = Ws('ws://localhost:3333',{
-      query:{msg:'hi',userid:localStorage.getItem("userid")},
+      query:{msg:'hi',userid:this.user.id},
       transport: {
         headers: { 'Cookie': 'foo=bar' }
       }
@@ -71,6 +74,7 @@ export class HomeComponent implements OnInit {
     })
     this.user = this.storageService.getCurrentUser();
   }
+  
 
   connect(){
 
@@ -112,7 +116,7 @@ export class HomeComponent implements OnInit {
 
     this.ws.subscribe('chat:global')
     this.chat = this.ws.getSubscription("chat:global");
-    this.chat.emit("connected",{userid:1});
+    this.chat.emit("connected",{userid:this.user.id});
       
       this.chat.on('receive-message',(data) => {
         console.log(data);
@@ -124,6 +128,17 @@ export class HomeComponent implements OnInit {
   selectContact(user){
     console.log("selected");
     this.userSelected = user;
+
+    this.services.getConversation(user.id).subscribe(
+      res=>{
+        console.log("RES: ",res);
+        this.conversacion = res;
+        console.log("CONVERSACION: ", this.conversacion);
+      },
+      error=>{
+        console.log("ERROR:",error);
+      }
+    );
     
   }
   saveGroup(){

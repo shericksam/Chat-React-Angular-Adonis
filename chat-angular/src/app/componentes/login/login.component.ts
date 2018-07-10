@@ -77,6 +77,7 @@ export class LoginComponent implements OnInit {
   
   private correctLogin(data: Session){
     this.storageService.setCurrentSession(data);
+    
     localStorage.setItem("token",data.token);
     this.router.navigate(['/home']);
   }

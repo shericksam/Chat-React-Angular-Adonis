@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 
 @Injectable({
@@ -15,8 +15,15 @@ export class ServiceApiService {
   }
 
   getConversation(withUser:number){
-    return this.http.get(this.ep+"/conversacion/"+withUser);
+    var user = JSON.parse(localStorage.getItem("currentUser")).user;
+    console.log("ME: ",user);
+    console.log("USER: ",withUser);
+    
+    return this.http.get<Mensaje[]>(this.ep+"/conversacion/"+withUser+"?me="+user.id);
   }
+
+  
+
 
 
 }
