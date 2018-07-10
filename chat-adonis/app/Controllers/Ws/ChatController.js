@@ -4,9 +4,12 @@ const User = use('App/Models/User')
 const Conversacion = use('App/Models/Conversacion')
 
 class ChatController {
+
   constructor ({ socket, request }) {
     this.socket = socket
+    this.socket.userid = request._qs.userid;
     this.request = request
+    //console.log("XD");
   }
 
 
@@ -19,13 +22,36 @@ class ChatController {
 
   }
 
-  onClose(){
-
+  async onConnected(data){
+    console.log("CONNECTION: ",this.socket.userid);
+    var user = await User.find(this.socket.userid);
+    if(user){
+      user.conectado = true;
+      user.sid = this.socket.id;
+      user.save();
+    }
   }
 
-  onNewMessage(data){
+  async onClose(){
+    var user = await User.find(this.socket.userid);
+    if(user){
+      user.conectado = false;
+      user.save();
+    }
+  }
+
+  async onNewMessage(data){
+
+    var user = await User.find(data.to);
+    if(user)
+      this.socket.emitTo("receive-message",data,[user.sid]);
+    
+    //this.socket.broadcast("receive-message",data);
+    this.saveMessage(data);
+  }
+
+  async onNewMessageToGroup(data){
     this.socket.broadcast("receive-message",data);
-    this.socket.emitTo("receive-message","receive-message",[this.socket.id]); 
     this.saveMessage(data);
   }
 

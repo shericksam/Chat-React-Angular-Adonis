@@ -14,7 +14,9 @@ $(document).ready(function(){
 		$(this).addClass("active");
 	});
 	
-	$("#status-options ul li").click(function() {
+	
+	$("#status-options").on("click"," ul li",function() {
+		console.log("SIIIIIII");
 		$("#profile-img").removeClass();
 		$("#status-online").removeClass("active");
 		$("#status-away").removeClass("active");

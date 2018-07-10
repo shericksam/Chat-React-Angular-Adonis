@@ -9,6 +9,7 @@ class ConversacioneController {
    * GET conversaciones
    */
   async index ({ request, response, view }) {
+
   }
 
   /**
@@ -16,6 +17,7 @@ class ConversacioneController {
    * GET conversaciones/create
    */
   async create ({ request, response, view }) {
+
   }
 
   /**
@@ -23,13 +25,22 @@ class ConversacioneController {
    * POST conversaciones
    */
   async store ({ request, response }) {
+
   }
 
   /**
    * Display a single conversacione.
    * GET conversaciones/:id
    */
-  async show ({ params, request, response, view }) {
+  async show ({ params, request, response, auth }) {
+    //const head = request.header('Authorization')
+    try {
+      if(await auth.check()){
+        var user = await auth.getUser();
+      }
+    } catch (error) {
+      response.send('Missing or invalid jwt token')
+    }
   }
 
   /**

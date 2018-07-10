@@ -3,6 +3,7 @@ import { StorageService } from '../../servicios/storage/storage.service';
 import { AuthenticationService } from '../../servicios/authentication/authentication.service';
 import { FormsModule } from '@angular/forms';
 import Ws from '@adonisjs/websocket-client'
+import { ServiceApiService } from '../../servicios/server/service-api.service';
 
 
 declare var jquery:any;
@@ -16,37 +17,54 @@ declare var $ :any;
 export class HomeComponent implements OnInit {
   public user: Usuario;
 
+  private users:Usuario[];
+
+  
   mensaje:string;
   title = 'app';
   nombre:string;
-  ws = Ws('ws://localhost:3333',{
-    query:{wsData:{msg:'hi'}},
-    transport: {
-      headers: { 'Cookie': 'foo=bar' }
-    }
-  })
+  idfake:number;
+  
+
+  ws;
+
   chat;
   contactSelected:string;
   isConnected = false;
+  userSelected:Usuario;
 
   constructor(
     private storageService: StorageService,
-    private authenticationService: AuthenticationService
+    private authenticationService: AuthenticationService,
+    private services:ServiceApiService
   ) {
     this.nombre = "Irving crespo"
     this.contactSelected = "http://emilcarlsson.se/assets/harveyspecter.png";
    }
 
   ngOnInit() {
+    this.services.usersService().subscribe(
+      res=>{
+        this.users = res;
+        console.log(res);
+      },
+    error => {
+
+    });
+
+
+    this.ws = Ws('ws://localhost:3333',{
+      query:{msg:'hi',userid:localStorage.getItem("userid")},
+      transport: {
+        headers: { 'Cookie': 'foo=bar' }
+      }
+    })
+    
     this.ws.connect()
     this.ws.on('open', () => {
       this.isConnected = true
-      this.ws.subscribe('chat:global')
-      this.chat = this.ws.getSubscription("chat:global");
-      this.chat.on('receive-message',(data) => {
-        console.log(data);
-        this.newMessage(data)
-      });
+      this.setupListeners();
+      
     })
     this.ws.on('close', () => {
       this.isConnected = false
@@ -54,6 +72,9 @@ export class HomeComponent implements OnInit {
     this.user = this.storageService.getCurrentUser();
   }
 
+  connect(){
+
+  }
 
   newMessage(data){
     $('<li class="replies"><img src="http://emilcarlsson.se/assets/mikeross.png" alt="" /><p>' + data.mensaje + '</p></li>').appendTo($('.messages ul'));
@@ -81,30 +102,39 @@ export class HomeComponent implements OnInit {
       }else{
 
       }
-     
-
-      //this.chat.emit('newMessage',{
-      //  mensaje:this.mensaje
-      //});
-      //this.newMessage({mensaje:this.mensaje})
       this.mensaje = ""
       
     }
     
   }
 
-  selectContact(event){
-    
-    console.log("Se eligio: ",event.target);
+  setupListeners(){
 
+    this.ws.subscribe('chat:global')
+    this.chat = this.ws.getSubscription("chat:global");
+    this.chat.emit("connected",{userid:1});
+      
+      this.chat.on('receive-message',(data) => {
+        console.log(data);
+        this.newMessage(data)
+      });
+      
   }
 
-  
-  
+  selectContact(user){
+    console.log("selected");
+    this.userSelected = user;
+    
+  }
+  saveGroup(){
+    console.log("save grupo");
+  }
+
   public logout(): void{
     this.authenticationService.logout().subscribe(
         response => {if(response) {this.storageService.logout();}}
     );
   }
+
 
 }

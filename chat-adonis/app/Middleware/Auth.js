@@ -7,11 +7,11 @@ class Auth {
   }
   async wsHandle ({ request,response,auth }, next) {
     // call next to advance the request
+    console.log("AUTH: ",request._qs);
     try {
-      console.log("Req: ",request);
-      console.log("Req: ",request._qs);
-
-      if(request._qs.wsData){
+     
+      if(request._qs){
+        console.log("AUTH: ",request._qs);
         console.log("Dataaa!!");
         //var user = await auth.getUser();
       }

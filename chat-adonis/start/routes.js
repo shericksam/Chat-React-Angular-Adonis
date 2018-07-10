@@ -15,8 +15,15 @@
 
 const Route = use('Route')
 
+Route.group(() => {
+    Route.resource('user', 'UsuarioController')
+    Route.post('/user/login', 'UsuarioController.login')
+}).prefix('api/v1')
+
 Route.get('/', ({ request }) => {
   return { greeting: 'Hello world in JSON' }
 })
+
+Route.resource("/usuarios","UsuarioController");
 
 Route.resource('/conversacion','ConversacioneController');
