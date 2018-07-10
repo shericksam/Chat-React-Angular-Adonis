@@ -1,5 +1,6 @@
 import {Injectable} from "@angular/core";
 import {Http, Response} from "@angular/http";
+import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import { LoginObject } from "../../componentes/login/shared/login-object.model";
 import { map, filter, catchError, mergeMap } from 'rxjs/operators';
@@ -10,15 +11,15 @@ import { RegisterObject } from "../../componentes/login/shared/register-object.m
 })
 export class AuthenticationService {
 
-  constructor(private http: Http) {}
+  constructor(private http: HttpClient) {}
 
   // private basePath = '/api/authenticate/';
-  private basePath = 'http://127.0.0.1:3333/api/v1/';
+  private basePath = 'http://localhost:3333/api/v1/';
 
   login(loginObj: LoginObject): Observable<Session> {
-    return this.http.post(this.basePath + 'login', loginObj).pipe(
-      map(this.extractData)
-    );
+    console.log("JEJE");
+    console.log("login: ",loginObj);
+    return this.http.post<any>(this.basePath + 'user/login', loginObj);
   }
   
   register(registerObj: RegisterObject): Observable<Session> {

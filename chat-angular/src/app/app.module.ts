@@ -45,6 +45,7 @@ import {MatInputModule} from '@angular/material';
       useClass: HttpInterceptorService,
       multi: true
     }
+
   ],
   bootstrap: [AppComponent]
 })

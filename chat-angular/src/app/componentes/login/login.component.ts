@@ -28,7 +28,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     this.loginForm = this.formBuilder.group({
-      username: ['', Validators.required],
+      email: ['', Validators.required],
       password: ['', Validators.required],
     })
     this.registerForm = this.formBuilderR.group({
@@ -41,12 +41,25 @@ export class LoginComponent implements OnInit {
   }
 
   public submitLogin(): void {
+    console.log("EEEY");
     this.submitted = true;
     this.error = null;
     if(this.loginForm.valid){
-      this.authenticationService.register(new RegisterObject(this.loginForm.value)).subscribe(
-        data => this.correctLogin(data),
-        error => this.error = JSON.parse(error._body)
+      this.authenticationService.login(new LoginObject(this.loginForm.value)).subscribe(
+        data =>{ 
+          this.correctLogin(data)
+        },
+
+        error => {
+          try{
+            console.log(error);
+            //this.error = JSON.parse(error._body)
+          }catch(error){
+            //console.log(error);
+          }
+          
+          
+        }
       )
     }
   }
@@ -55,7 +68,7 @@ export class LoginComponent implements OnInit {
     this.submittedReg = true;
     this.error = null;
     if(this.registerForm.valid){
-      this.authenticationService.login(new LoginObject(this.loginForm.value)).subscribe(
+      this.authenticationService.login(new RegisterObject(this.loginForm.value)).subscribe(
         data => this.correctLogin(data),
         error => this.error = JSON.parse(error._body)
       )
@@ -64,6 +77,7 @@ export class LoginComponent implements OnInit {
   
   private correctLogin(data: Session){
     this.storageService.setCurrentSession(data);
+    localStorage.setItem("token",data.token);
     this.router.navigate(['/home']);
   }
 

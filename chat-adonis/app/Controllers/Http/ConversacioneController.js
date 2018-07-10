@@ -34,8 +34,10 @@ class ConversacioneController {
    */
   async show ({ params, request, response, auth }) {
     //const head = request.header('Authorization')
+    
     try {
       if(await auth.check()){
+
         var user = await auth.getUser();
       }
     } catch (error) {
