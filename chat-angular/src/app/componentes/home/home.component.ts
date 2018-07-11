@@ -53,7 +53,8 @@ export class HomeComponent implements OnInit {
     private notifi:NotificationsService
   ) {
     this.nombre = "Irving crespo"
-    this.contactSelected = "http://emilcarlsson.se/assets/harveyspecter.png";
+    console.log("this.storageService.getCurrentSession", this.storageService.getCurrentSession().user.foto);
+    this.contactSelected = "http://127.0.0.1:3333/" + this.storageService.getCurrentSession().user.foto + ".jpg";
    }
 
   ngOnInit() {
