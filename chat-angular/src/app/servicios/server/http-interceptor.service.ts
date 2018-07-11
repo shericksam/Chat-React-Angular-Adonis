@@ -7,11 +7,6 @@ import {
 } from '@angular/common/http';
 import { Observable } from 'rxjs';
 //import { AuthService } from './auth/auth.service';
-<<<<<<< HEAD
-import { Observable } from 'rxjs';
-=======
-// import { Observable } from 'rxjs/Observable';
->>>>>>> 1fddcda284e609817248bf43234bd133a7fad819
 
 @Injectable({
   providedIn: 'root'

@@ -76,7 +76,7 @@ export class HomeComponent implements OnInit {
         this.user = JSON.parse(localStorage.getItem("currentUser")).user;
         console.log("ID: ",this.user.id);
 
-        this.ws = Ws('ws://localhost:3333',{
+        this.ws = Ws('ws://192.168.1.80:3333',{
           query:{msg:'hi',userid:this.user.id},
           transport: {
             headers: { 'Cookie': 'foo=bar' }
@@ -184,7 +184,7 @@ export class HomeComponent implements OnInit {
 
 
   sendMessage(){
-    
+
     if(this.mensaje && this.mensaje != ""){
       $('<li class="sent"><img src="http://emilcarlsson.se/assets/mikeross.png" alt="" /><p>' + this.mensaje + '</p></li>').appendTo($('.messages ul'));
       //$('.message-input input').val(null);

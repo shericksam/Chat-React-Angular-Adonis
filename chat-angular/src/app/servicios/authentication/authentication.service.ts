@@ -14,7 +14,7 @@ export class AuthenticationService {
   constructor(private http: HttpClient) {}
 
   // private basePath = '/api/authenticate/';
-  private basePath = 'http://localhost:3333/api/v1/';
+  private basePath = 'http://192.168.1.80:3333/api/v1/';
 
   login(loginObj: LoginObject): Observable<Session> {
     // console.log("JEJE");
