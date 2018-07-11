@@ -5,8 +5,9 @@ import {
   HttpEvent,
   HttpInterceptor
 } from '@angular/common/http';
+import { Observable } from 'rxjs';
 //import { AuthService } from './auth/auth.service';
-import { Observable } from 'rxjs/Observable';
+// import { Observable } from 'rxjs/Observable';
 
 @Injectable({
   providedIn: 'root'
