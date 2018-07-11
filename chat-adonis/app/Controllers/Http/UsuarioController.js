@@ -57,7 +57,8 @@ class UsuarioController {
         var namePhoto = userInfo.username.replace(" ", "");
         if(userInfo.foto){
             base64Img.img(userInfo.foto, Helpers.publicPath(), namePhoto, function(err, filepath) {
-                // console.log(filepath);
+                console.log(filepath);
+                namePhoto = filepath;
             });
         }else{
             namePhoto = "default.png";
