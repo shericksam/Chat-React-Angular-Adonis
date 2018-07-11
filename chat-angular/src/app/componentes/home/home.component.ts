@@ -20,7 +20,8 @@ export class HomeComponent implements OnInit {
 
   private users:Usuario[];
   private groups:Grupo[];
-  private conversacion:Mensaje[];
+  private conversacion:any[];
+  
   
   mensaje:string;
   title = 'app';
@@ -35,6 +36,7 @@ export class HomeComponent implements OnInit {
   contactSelected:string;
   isConnected = false;
   userSelected:Usuario;
+  groupSelected:Grupo;
 
   constructor(
     private storageService: StorageService,
@@ -51,10 +53,11 @@ export class HomeComponent implements OnInit {
 
     this.services.getGrupos().subscribe(
       res=>{
+        this.groups = res;
         console.log("Grupos: ",res);
       },
       error=>{
-
+        console.log("Grupos ERROR: ",error);
       }
     );
 
@@ -105,6 +108,15 @@ export class HomeComponent implements OnInit {
     console.log("Mensaje: ",data.mensaje);
     this.mensaje = ""
   }
+  newMessageFromGroup(data){
+    this.receivedMessage(data);
+    $('<li class="replies"><h5>'+data.nombre+'</h5><p>' + data.mensaje + '</p></li>').appendTo($('.messages ul'));
+    //$('.message-input input').val(null);
+    $('.contact.active .preview').html('<span>You: </span>' + data.mensaje);
+    $(".messages").animate({ scrollTop: $(document).height() }, "fast");
+    console.log("Mensaje: ",data.mensaje);
+    this.mensaje = ""
+  }
   sendMessage(){
     if(this.mensaje && this.mensaje != ""){
       $('<li class="sent"><img src="http://emilcarlsson.se/assets/mikeross.png" alt="" /><p>' + this.mensaje + '</p></li>').appendTo($('.messages ul'));
@@ -112,17 +124,29 @@ export class HomeComponent implements OnInit {
       $('.contact.active .preview').html('<span>You: </span>' + this.mensaje);
       $(".messages").animate({ scrollTop: $(document).height() }, "fast");
       console.log("WS: ",this.ws);
-      
-      console.log(this.ws.getSubscription('chat:global'));
-      if(this.isConnected){
-        this.ws.getSubscription('chat:global').emit('newMessage',{
-          mensaje:this.mensaje,
-          from:this.user.id,
-          to:this.userSelected.id
-        });
-      }else{
 
+      if(this.groupSelected != null){
+        if(this.isConnected){
+          this.ws.getSubscription('chat:grupo'+this.groupSelected.id).emit('newMessageToGroup',{
+            mensaje:this.mensaje,
+            from:this.user.id,
+            grupo:this.groupSelected.id
+          });
+        }else{
+  
+        }
+      }else{
+        if(this.isConnected){
+          this.ws.getSubscription('chat:global').emit('newMessage',{
+            mensaje:this.mensaje,
+            from:this.user.id,
+            to:this.userSelected.id
+          });
+        }else{
+  
+        }
       }
+      
       this.mensaje = ""
       
     }
@@ -165,14 +189,23 @@ export class HomeComponent implements OnInit {
 
   setupListeners(){
 
+    this.groups.forEach(element => {
+      this.ws.subscribe('chat:grupo'+element.id)
+      this.ws.getSubscription('chat:grupo'+element.id).on('receive-message-group',(data) => {
+        console.log(data);
+        this.newMessageFromGroup(data)
+      });
+    });
+
     this.ws.subscribe('chat:global')
     this.chat = this.ws.getSubscription("chat:global");
+
     this.chat.emit("connected",{userid:this.user.id});
-      
       this.chat.on('receive-message',(data) => {
         console.log(data);
         this.newMessage(data)
       });
+    console.log("WS: ",this.ws);
       
   }
 
@@ -205,6 +238,25 @@ export class HomeComponent implements OnInit {
     );
     
   }
+  selectGroup(grupo){
+    $("li#grupo_"+grupo.id).css({"background-color":"#2c3e50"});
+    $("li").removeClass("active");
+    $("li#grupo_"+grupo.id).addClass("active");
+
+    $("div.messages > ul > li").remove();
+    
+    this.userSelected = null;
+    this.groupSelected = grupo;
+    this.conversacion = [];
+
+    console.log("Grupo: ",grupo);
+    
+
+
+
+  }
+
+
   saveGroup(){
     console.log("save grupo");
     console.log("NAME G: ",this.nameGroup);

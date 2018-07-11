@@ -17,8 +17,12 @@ class GrupoController {
     try{
       if(await auth.check()){
         let user = await auth.getUser();
+
         if(user){
+
           let grupos = await Grupo.query()
+          .table('grupos')
+          .innerJoin("usuario_grupos","grupos.id","usuario_grupos.fk_grupo")
           .where("fk_user",user.id)
           .fetch()
           return response.status(200).json(grupos);

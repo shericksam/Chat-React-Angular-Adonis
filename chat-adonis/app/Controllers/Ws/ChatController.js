@@ -2,6 +2,7 @@
 
 const User = use('App/Models/User')
 const Conversacion = use('App/Models/Conversacion')
+const ConversacionGrupo = use('App/Models/ConversacionGrupo')
 
 class ChatController {
 
@@ -13,8 +14,6 @@ class ChatController {
 
     //console.log("XD");
   }
-
-
 
   onSent(){
 
@@ -48,46 +47,24 @@ class ChatController {
     if(user)
       this.socket.emitTo("receive-message",data,[user.sid]);
     
-    //this.socket.broadcast("receive-message",data);
     this.saveMessage(data);
   }
 
   async onNewMessageToGroup(data){
-    this.socket.broadcast("receive-message",data);
-    this.saveMessage(data);
+    var user = await User.find(data.from);
+    data.nombre = user.nombre+" "+user.apellido;
+    this.socket.broadcast("receive-message-group",data);
+    this.saveMessageToGroup(data);
+
   }
 
   async saveMessage(data){
 
-    /**
-     * const subquery = Database
-      .from('accounts')
-      .where('account_name', 'somename')
-      .select('account_name')
+    var conv = await Conversacion.query().where("user1",data.from).where("user2",data.to).first();
+    if(!conv){
+      conv = await Conversacion.query().where("user1",data.to).where("user2",data.from).first();
+    }
 
-      const users = await Database
-        .from('users')
-        .whereIn('id', subquery)
-     */
-
-    console.log("From: ",data.from);
-    console.log("To: ",data.to);
-    
-      var conv = await Conversacion.query()
-        .where("user1",data.from)
-        .where("user2",data.to)
-        .first();
-
-      if(!conv){
-        conv = await Conversacion.query()
-        .where("user1",data.to)
-        .where("user2",data.from)
-        .first();
-      }
-
-    console.log("");
-
-    //console.log("User: ",conv);
     if(conv == null){
       conv = new Conversacion();
       conv.user1 = data.from;
@@ -102,6 +79,25 @@ class ChatController {
       conv.save();
       console.log("DESPUES: ",conv.conversacion);
     }
+  }
+
+  saveMessageToGroup(data){
+    var conv = await ConversacionGrupo.query().where("fk_grupo",data.grupo).first();
+    
+    if(conv == null){
+      conv = new ConversacionGrupo();
+      conv.fk_grupo = data.grupo;
+      conv.conversacion = JSON.stringify([{mensaje:data.mensaje,from:data.from,nombre:data.nombre}]);
+      conv.save();
+    }else{
+      console.log("ANTES: ",conv.conversacion);
+      var json = JSON.parse(JSON.stringify(conv.conversacion));
+      json.push({mensaje:data.mensaje,from:data.from,nombre:data.nombre});
+      conv.conversacion =  JSON.stringify(json);
+      conv.save();
+      console.log("DESPUES: ",conv.conversacion);
+    }
+
   }
 
 }

@@ -64,11 +64,10 @@
             <label (ngModel)="idfake" for=""><i class="fa fa-search" aria-hidden="true"></i></label>
             <input type="text" placeholder="Buscar" />
           </div>
-          <div id="contacts">
-            <ul>
 
-              
-              
+          <div id="contacts">
+              <h2>Usuarios</h2>
+            <ul style="list-style-type: none;">
               <li id="user_{{user.id}}" *ngFor="let user of users" (click)="selectContact(user)" class="contact">
                 <div class="wrap">
                   <span [ngClass]="{'contact-status online':user.conectado == true,'contact-status':1 == 1}"></span>
@@ -81,7 +80,25 @@
               </li>
         
             </ul>
+            <h2>Grupos</h2>
+            <ul style="list-style-type: none;">
+              <li id="grupo_{{grupo.id}}" *ngFor="let grupo of groups" (click)="selectGroup(grupo)" class="contact">
+                <div class="wrap">
+                  <span></span>
+                  <img src="http://emilcarlsson.se/assets/louislitt.png" alt="" />
+                  <div class="meta">
+                    <p class="name">{{grupo.nombre}}</p>
+                    <p class="preview"></p>
+                  </div>
+                </div>
+              </li>
+        
+            </ul>
+
+
           </div>
+
+          
           <div id="bottom-bar">
             <button id="addcontact"><i class="fa fa-user-plus fa-fw" aria-hidden="true"></i> <span>Crear grupo</span></button>
             <button id="settings"><i class="fa fa-cog fa-fw" aria-hidden="true"></i> <span>Configuracion</span></button>
