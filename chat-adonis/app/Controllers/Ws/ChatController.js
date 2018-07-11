@@ -44,6 +44,10 @@ class ChatController {
   async onNewMessage(data){
 
     var user = await User.find(data.to);
+    var user2 = await User.find(data.from);
+
+    data.nombre = user2.nombre;
+    data.foto = user2.foto;
     if(user)
       this.socket.emitTo("receive-message",data,[user.sid]);
     
@@ -52,7 +56,9 @@ class ChatController {
 
   async onNewMessageToGroup(data){
     var user = await User.find(data.from);
+
     data.nombre = user.nombre+" "+user.apellido;
+    data.foto = user.foto;
     console.log("MENSAJE TOPIC: ",this.socket.topic);
     console.log("Socket:",this.socket.channel);
     
