@@ -23,9 +23,7 @@ export class AuthenticationService {
   }
   
   register(registerObj: RegisterObject): Observable<Session> {
-    return this.http.post(this.basePath + 'user', registerObj).pipe(
-      map(this.extractData)
-    );
+    return this.http.post<Session>(this.basePath + 'user', registerObj);
   }
 
   logout(): Observable<Boolean> {

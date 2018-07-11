@@ -68,9 +68,15 @@ export class LoginComponent implements OnInit {
     this.submittedReg = true;
     this.error = null;
     if(this.registerForm.valid){
-      this.authenticationService.login(new RegisterObject(this.loginForm.value)).subscribe(
-        data => this.correctLogin(data),
-        error => this.error = JSON.parse(error._body)
+      this.authenticationService.register(new RegisterObject(this.registerForm.value)).subscribe(
+        data => {
+          this.correctLogin(data)
+          console.log("ESTO ES LA DATAAAA!!!!: ",data);
+        },
+        error => {
+          console.log("Error register: ",error);
+          //this.error = JSON.parse(error._body)
+        }
       )
     }
   }

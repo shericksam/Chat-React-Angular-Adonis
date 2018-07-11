@@ -14,12 +14,26 @@ export class ServiceApiService {
     return this.http.get<Usuario[]>(this.ep+"/usuarios",{});
   }
 
+  newGroup(users,name){
+    let par = new HttpParams();
+    
+    par.append("users",users);
+    par.append("nombre",name);
+    
+    console.log("PARAMS: ",par);
+    return this.http.post(this.ep+"/grupos",{users:users,nombre:name});
+  }
+
   getConversation(withUser:number){
     var user = JSON.parse(localStorage.getItem("currentUser")).user;
     console.log("ME: ",user);
     console.log("USER: ",withUser);
     
     return this.http.get<Mensaje[]>(this.ep+"/conversacion/"+withUser+"?me="+user.id);
+  }
+
+  getGrupos(){
+    return this.http.get<Grupo[]>(this.ep+"/grupos");
   }
 
   

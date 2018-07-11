@@ -9,9 +9,23 @@ class UsuarioController {
      * Show a list of all usuarios.
      * GET usuarios
      */
-    async index({ request, response, view }) {
-        var users = await Usuario.all();
-        return users;
+    async index({ request, response, view, auth }) {
+        try{
+            if(await auth.check()){
+                let user = await auth.getUser();
+                console.log("user token: ",user);
+                var users = await Usuario
+                .query()
+                .where("id","!=",user.id)
+                .fetch();
+                return response.json(users,200);
+            }
+        }catch(error){
+            return response.json([],401);
+        }
+
+       
+        
     }
 
 
@@ -37,7 +51,7 @@ class UsuarioController {
     async store({ request, response ,auth }) {
 
         const userInfo = request.only(['username', 'nombre', 'apellido', 'email', 'password'])
-
+        console.log("userinfooo: ",userInfo);
         const user = new Usuario()
         user.username = userInfo.username
         user.nombre = userInfo.nombre
@@ -49,7 +63,12 @@ class UsuarioController {
         try {
             await user.save()
             const us = await auth.attempt(userInfo.email, userInfo.password);
-            return response.status(201).json(us)
+            //let user = auth.getUser();
+
+            return response.status(201).json({
+                user:user,
+                token:us.token
+            })
         } catch (error) {
             return response.status(206).json({ data: error.detail })
         }

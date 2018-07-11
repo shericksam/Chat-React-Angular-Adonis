@@ -8,7 +8,9 @@ class ChatController {
   constructor ({ socket, request }) {
     this.socket = socket
     this.socket.userid = request._qs.userid;
+    console.log("User id: ",request._qs.userid);
     this.request = request
+
     //console.log("XD");
   }
 
@@ -26,7 +28,7 @@ class ChatController {
     console.log("CONNECTION: ",this.socket.userid);
     var user = await User.find(this.socket.userid);
     if(user){
-      user.conectado = true;
+      user.conectado = 1;
       user.sid = this.socket.id;
       user.save();
     }
@@ -56,8 +58,35 @@ class ChatController {
   }
 
   async saveMessage(data){
-    var conv = await Conversacion.query().where("user1",data.from)
-    .orWhere("user2",data.from).first();
+
+    /**
+     * const subquery = Database
+      .from('accounts')
+      .where('account_name', 'somename')
+      .select('account_name')
+
+      const users = await Database
+        .from('users')
+        .whereIn('id', subquery)
+     */
+
+    console.log("From: ",data.from);
+    console.log("To: ",data.to);
+    
+      var conv = await Conversacion.query()
+        .where("user1",data.from)
+        .where("user2",data.to)
+        .first();
+
+      if(!conv){
+        conv = await Conversacion.query()
+        .where("user1",data.to)
+        .where("user2",data.from)
+        .first();
+      }
+
+    console.log("");
+
     //console.log("User: ",conv);
     if(conv == null){
       conv = new Conversacion();

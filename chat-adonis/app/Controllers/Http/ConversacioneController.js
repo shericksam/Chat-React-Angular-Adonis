@@ -37,25 +37,33 @@ class ConversacioneController {
   async show ({ params, request, response, auth }) {
     const head = request.header('Authorization')
     console.log("HEAD: ",head);
-    var me = request.query.me;
-    console.log("MEE: ",me);
+    
+    var all = request.only(["me"]);
+    var me = all.me;
     try {
       if(await auth.check()){
 
         var user = await auth.getUser();
-        var me = request.query.me;
-        console.log("MEE: ",me);
       
-        var conv = await Conversacion.query()
+        //console.log("MEE: ",me);
+
+        console.log("ME: ",me);
+        console.log("HE: ",params.id);
+      
+        var conv = await Conversacion
+        .query()
         .where("user1",params.id)
         .where("user2",me)
         .first();
+
+        console.log("Conv: ",conv);
 
         if(!conv){
           conv = await Conversacion.query()
           .where("user2",params.id)
           .where("user1",me)
           .first();
+          console.log("Conv: ",conv);
         }
         if(conv){
           response.json(conv.conversacion,200);

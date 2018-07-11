@@ -27,3 +27,5 @@ Route.get('/', ({ request }) => {
 Route.resource("/usuarios","UsuarioController");
 
 Route.resource('/conversacion','ConversacioneController');
+
+Route.resource("/grupos",'GrupoController');

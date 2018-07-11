@@ -7,7 +7,7 @@ import { AuthorizatedGuard } from '../servicios/guard/authorizated.guard';
 import { LoginComponent } from '../componentes/login/login.component';
 
 const appRoutes: Routes = [
-  { path: 'home', component: HomeComponent/*, canActivate: [ AuthorizatedGuard */ },
+  { path: 'home', component: HomeComponent, canActivate: [ AuthorizatedGuard] },
   { path: 'login', component: LoginComponent },
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: '**', redirectTo: '/home'}

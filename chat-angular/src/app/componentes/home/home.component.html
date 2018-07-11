@@ -5,7 +5,7 @@
           <div id="profile">
             <div class="wrap">
               <img id="profile-img" src="http://emilcarlsson.se/assets/mikeross.png" class="online" alt="" />
-              <p></p>
+              <p>{{user.nombre}} {{user.apellido}}</p>
               <i class="fa fa-chevron-down expand-button" aria-hidden="true"></i>
               <div id="status-options">
                 <ul>
@@ -18,7 +18,7 @@
               <div id="expanded">
                 
                 <h3>Crear grupo</h3>
-                <input name="twitter" placeholder="Nombre" type="text" value="mikeross" />
+                <input name="twitter" placeholder="Nombre" type="text" [(ngModel)]="nameGroup" />
                 <button (click)="saveGroup()" style="background-color: rgb(81, 211, 81);border: none;
                 color: white;
                 padding: 15px 32px;
@@ -27,48 +27,26 @@
                 display: inline-block;
                 font-size: 16px;" class="btn btn-success">Guardar</button>
 
-                <div style="overflow-y: scroll;height: 500px">
-                    <ul>
-                        <li (click)="selectContact(null)" class="contact" style="margin: 5px 0 0 0;
-                        padding: 0 0 1px;
-                        font-weight: 400;
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        -moz-transition: 1s all ease;
-                        -o-transition: 1s all ease;
-                        -webkit-transition: 1s all ease;
-                        transition: 1s all ease;
-                        position: initial;
-                        border-radius: initial;
-                        background: none;
-                        border: none;
-                        padding: 0 2px 0 0;
-                        margin: 0 0 0 1px;
-                        opacity: 0.5;">
-                          <div class="wrap">
-                            <span class="contact-status online"></span>
-                            <img src="http://emilcarlsson.se/assets/louislitt.png" alt="" />
-                            <div class="meta">
-                              <p class="name">Louis Litt</p>
-                              <p class="preview">You just got LITT up, Mike.</p>
+                <div style="overflow-y: scroll;height: 500px;width: 300px;float: left; ">
+                    <ul style="height: auto;">
+
+                      <li style="list-style-type: none;padding-bottom: 10px;margin-bottom: 20px;bottom: 20px; height: 100px;" class="contact" *ngFor="let user of users">
+                          <div class="" style="width:500px">
+                              <label style="display: inline-block;" class="container">
+                                  <input id="checkeduser" (change)="selectUserToGroup(user,$event)" type="checkbox" >
+                                  <span class="checkmark"></span>
+                              </label>
+                              <span class="contact-status online"></span>
+                              <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
+                              <div class="meta">
+                                <p class="name">{{user.nombre}} {{user.apellido}}</p>
+                                <p class="preview"></p>
+                              </div>
+                              
                             </div>
-                          </div>
-                        </li>
-              
-                        
-                        <li class="contact active">
-                          <div class="wrap">
-                            <span class="contact-status busy"></span>
-                            <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-                            <div class="meta">
-                              <p class="name">Harvey Specter</p>
-                              <p class="preview">Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>
-                            </div>
-                          </div>
-                        </li>
-                        
-                  
+ 
+                      </li>
+                                        
                       </ul>
                 </div>
                 
@@ -91,12 +69,12 @@
 
               
               
-              <li *ngFor="let user of users" (click)="selectContact(user)" class="contact {{user.conectado?active:''}}">
+              <li id="user_{{user.id}}" *ngFor="let user of users" (click)="selectContact(user)" class="contact">
                 <div class="wrap">
-                  <span class="contact-status online"></span>
+                  <span [ngClass]="{'contact-status online':user.conectado == true,'contact-status':1 == 1}"></span>
                   <img src="http://emilcarlsson.se/assets/louislitt.png" alt="" />
                   <div class="meta">
-                    <p class="name">{{user.nombre}}</p>
+                    <p class="name">{{user.nombre}} {{user.apellido}}</p>
                     <p class="preview"></p>
                   </div>
                 </div>
@@ -121,7 +99,7 @@
             </div>
           </div>
           <div class="messages">
-            <h2 *ngIf="!userSelected">Selecciona un usuario</h2>
+            <h2 class="text-center" *ngIf="!userSelected">Selecciona un usuario de tu lista para chatear</h2>
             <ul *ngIf="userSelected">
 
               <li *ngFor="let mensaje of conversacion" [ngClass]="{sent: mensaje.from == user.id,replies:mensaje.from != user.id}">
