@@ -25,6 +25,7 @@ class GrupoController {
           .table('grupos')
           .innerJoin("usuario_grupos","grupos.id","usuario_grupos.fk_grupo")
           .where("fk_user",user.id)
+          .select("grupos.id","grupos.nombre")
           .fetch()
           return response.status(200).json(grupos);
         }
@@ -106,7 +107,9 @@ class GrupoController {
     try{
       var grupo = params.id;
       if(await auth.check()){
-        let conv = ConversacionGrupo.query().where("fk_grupo",grupo).first();
+        console.log("fk: ",grupo);
+        let conv = await ConversacionGrupo.query().where("fk_grupo",grupo).first();
+        console.log(conv);
         if(conv){
           return response.status(200).json(conv.conversacion);
         }else{

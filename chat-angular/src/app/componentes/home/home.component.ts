@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import Ws from '@adonisjs/websocket-client'
 import { ServiceApiService } from '../../servicios/server/service-api.service';
 import { map } from 'rxjs/operators';
+import { forEach } from '@angular/router/src/utils/collection';
 
 
 declare var jquery:any;
@@ -21,6 +22,7 @@ export class HomeComponent implements OnInit {
   private users:Usuario[];
   private groups:Grupo[];
   private conversacion:any[];
+  private listeners:any[];
   
   
   mensaje:string;
@@ -28,6 +30,7 @@ export class HomeComponent implements OnInit {
   nombre:string;
   idfake:number;
   lastRequest:number;
+  lastRequestG:number;
   usersNewGroup;
   nameGroup:string;
   ws;
@@ -109,8 +112,9 @@ export class HomeComponent implements OnInit {
     this.mensaje = ""
   }
   newMessageFromGroup(data){
-    this.receivedMessage(data);
-    $('<li class="replies"><h5>'+data.nombre+'</h5><p>' + data.mensaje + '</p></li>').appendTo($('.messages ul'));
+    this.receivedMessageGroup(data);
+    $('<li class="replies"><p><strong style="margin: 0" *ngIf="groupSelected">'+data.nombre+'</strong>'
+    +'<br>' + data.mensaje + '</p></li>').appendTo($('.messages ul'));
     //$('.message-input input').val(null);
     $('.contact.active .preview').html('<span>You: </span>' + data.mensaje);
     $(".messages").animate({ scrollTop: $(document).height() }, "fast");
@@ -123,10 +127,10 @@ export class HomeComponent implements OnInit {
       //$('.message-input input').val(null);
       $('.contact.active .preview').html('<span>You: </span>' + this.mensaje);
       $(".messages").animate({ scrollTop: $(document).height() }, "fast");
-      console.log("WS: ",this.ws);
-
+      
       if(this.groupSelected != null){
         if(this.isConnected){
+          console.log("****** LANZADO A GRUPO "+this.groupSelected.id+" ************");
           this.ws.getSubscription('chat:grupo'+this.groupSelected.id).emit('newMessageToGroup',{
             mensaje:this.mensaje,
             from:this.user.id,
@@ -137,6 +141,7 @@ export class HomeComponent implements OnInit {
         }
       }else{
         if(this.isConnected){
+          console.log("****** LANZADO A USUARIO "+this.userSelected.id+" ************");
           this.ws.getSubscription('chat:global').emit('newMessage',{
             mensaje:this.mensaje,
             from:this.user.id,
@@ -193,14 +198,7 @@ export class HomeComponent implements OnInit {
   }
 
   setupListeners(){
-
-    this.groups.forEach(element => {
-      this.ws.subscribe('chat:grupo'+element.id)
-      this.ws.getSubscription('chat:grupo'+element.id).on('receive-message-group',(data) => {
-        console.log(data);
-        this.newMessageFromGroup(data)
-      });
-    });
+    this.listeners = [];
 
     this.ws.subscribe('chat:global')
     this.chat = this.ws.getSubscription("chat:global");
@@ -211,8 +209,43 @@ export class HomeComponent implements OnInit {
       console.log(data);
       this.newMessage(data)
     });
+
+
+    this.groups.forEach(element => {
+
+      (function(any){
+        console.log();
+        any.ws.subscribe('chat:grupo'+element.id)
+        console.log("SUBSCRITO: ",'chat:grupo'+element.id);
+        any.ws.getSubscription("chat:grupo"+element.id).on('receive-message-group',(data) => {
+          console.log("VAYA VAYA: ",data);
+          any.newMessageFromGroup(data)
+        })
+      })(this)
+      //f(this.ws,element);
+      //this.setListener(element);
+    });
+
+    
     console.log("WS: ",this.ws);
       
+  }
+
+  setListener(id){
+    this.listeners.push(this.ws.getSubscription('chat:grupo'+id));
+    this.listeners[this.listeners.length - 1].on('receive-message-group',(data) => {
+      console.log("LLEGO POR GRUPO "+data.grupo);
+      console.log(data);
+      this.newMessageFromGroup(data)
+    });
+
+    console.log("Listeners: ",this.listeners);
+
+    /*this.ws.getSubscription('chat:grupo'+id).on('receive-message-group',(data) => {
+      console.log("LLEGO POR GRUPO "+data.grupo);
+      console.log(data);
+      this.newMessageFromGroup(data)
+    });*/
   }
 
   selectContact(user){
@@ -246,11 +279,14 @@ export class HomeComponent implements OnInit {
     
   }
   selectGroup(grupo){
+
     $("li#grupo_"+grupo.id).css({"background-color":"#2c3e50"});
     $("li").removeClass("active");
     $("li#grupo_"+grupo.id).addClass("active");
 
 
+    if(this.lastRequestG == grupo.id)
+      return false;
     $("div.messages > ul > li").remove();
     
     this.userSelected = null;
@@ -261,7 +297,7 @@ export class HomeComponent implements OnInit {
     this.services.getConversationGroup(grupo.id).subscribe(
       res=>{
         console.log("RES: ",res);
-        this.lastRequest = grupo.id;
+        this.lastRequestG = grupo.id;
 
         this.conversacion = res;
         console.log("CONVERSACION: ", this.conversacion);

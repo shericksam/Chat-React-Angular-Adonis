@@ -1,5 +1,5 @@
 'use strict'
-
+const Ws = use('Ws')
 const User = use('App/Models/User')
 const Conversacion = use('App/Models/Conversacion')
 const ConversacionGrupo = use('App/Models/ConversacionGrupo')
@@ -9,7 +9,7 @@ class ChatController {
   constructor ({ socket, request }) {
     this.socket = socket
     this.socket.userid = request._qs.userid;
-    console.log("User id: ",request._qs.userid);
+    
     this.request = request
 
     //console.log("XD");
@@ -24,7 +24,7 @@ class ChatController {
   }
 
   async onConnected(data){
-    console.log("CONNECTION: ",this.socket.userid);
+    
     var user = await User.find(this.socket.userid);
     if(user){
       user.conectado = 1;
@@ -53,6 +53,14 @@ class ChatController {
   async onNewMessageToGroup(data){
     var user = await User.find(data.from);
     data.nombre = user.nombre+" "+user.apellido;
+    console.log("MENSAJE TOPIC: ",this.socket.topic);
+    console.log("Socket:",this.socket.channel);
+    
+    /*Ws
+      .getChannel('chat:*')
+      .topic('chat:grupo'+data.grupo)
+      .broadcast("receive-message-group",data);*/
+
     this.socket.broadcast("receive-message-group",data);
     this.saveMessageToGroup(data);
 
@@ -72,12 +80,12 @@ class ChatController {
       conv.conversacion = JSON.stringify([{mensaje:data.mensaje,from:data.from,to:data.to}]);
       conv.save();
     }else{
-      console.log("ANTES: ",conv.conversacion);
+  
       var json = JSON.parse(JSON.stringify(conv.conversacion));
       json.push({mensaje:data.mensaje,from:data.from,to:data.to});
       conv.conversacion =  JSON.stringify(json);
       conv.save();
-      console.log("DESPUES: ",conv.conversacion);
+      
     }
   }
 
@@ -93,12 +101,11 @@ class ChatController {
       conv.conversacion = JSON.stringify([{mensaje:data.mensaje,from:data.from,nombre:data.nombre}]);
       conv.save();
     }else{
-      console.log("ANTES: ",conv.conversacion);
+     
       var json = JSON.parse(JSON.stringify(conv.conversacion));
       json.push({mensaje:data.mensaje,from:data.from,nombre:data.nombre});
       conv.conversacion =  JSON.stringify(json);
       conv.save();
-      console.log("DESPUES: ",conv.conversacion);
     }
 
   }

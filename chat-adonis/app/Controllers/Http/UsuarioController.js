@@ -13,7 +13,7 @@ class UsuarioController {
         try{
             if(await auth.check()){
                 let user = await auth.getUser();
-                console.log("user token: ",user);
+                
                 var users = await Usuario
                 .query()
                 .where("id","!=",user.id)
