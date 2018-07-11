@@ -83,12 +83,12 @@ class ChatController {
       conv = new Conversacion();
       conv.user1 = data.from;
       conv.user2 = data.to;
-      conv.conversacion = JSON.stringify([{mensaje:data.mensaje,from:data.from,to:data.to}]);
+      conv.conversacion = JSON.stringify([{mensaje:data.mensaje,from:data.from,to:data.to,nombre:data.nombre,foto:data.foto}]);
       conv.save();
     }else{
   
       var json = JSON.parse(JSON.stringify(conv.conversacion));
-      json.push({mensaje:data.mensaje,from:data.from,to:data.to});
+      json.push({mensaje:data.mensaje,from:data.from,to:data.to,nombre:data.nombre,foto:data.foto});
       conv.conversacion =  JSON.stringify(json);
       conv.save();
       
@@ -104,12 +104,12 @@ class ChatController {
     if(conv == null){
       conv = new ConversacionGrupo();
       conv.fk_grupo = data.grupo;
-      conv.conversacion = JSON.stringify([{mensaje:data.mensaje,from:data.from,nombre:data.nombre}]);
+      conv.conversacion = JSON.stringify([{mensaje:data.mensaje,from:data.from,nombre:data.nombre,foto:data.foto}]);
       conv.save();
     }else{
      
       var json = JSON.parse(JSON.stringify(conv.conversacion));
-      json.push({mensaje:data.mensaje,from:data.from,nombre:data.nombre});
+      json.push({mensaje:data.mensaje,from:data.from,nombre:data.nombre,foto:data.foto});
       conv.conversacion =  JSON.stringify(json);
       conv.save();
     }
