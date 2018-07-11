@@ -116,7 +116,7 @@
             </div>
           </div>
           <div class="messages">
-            <h2 class="text-center" *ngIf="!userSelected">Selecciona un usuario de tu lista para chatear</h2>
+            <h2 class="text-center" *ngIf="!userSelected && !groupSelected">Selecciona un usuario de tu lista para chatear</h2>
             <ul *ngIf="userSelected">
 
               <li *ngFor="let mensaje of conversacion" [ngClass]="{sent: mensaje.from == user.id,replies:mensaje.from != user.id}">

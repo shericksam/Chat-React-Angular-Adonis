@@ -36,6 +36,10 @@ export class ServiceApiService {
     return this.http.get<Grupo[]>(this.ep+"/grupos");
   }
 
+  getConversationGroup(grupo){
+    return this.http.get<MensajeGrupo[]>(this.ep+"/grupos/conversacion/"+grupo);
+  }
+
   
 
 

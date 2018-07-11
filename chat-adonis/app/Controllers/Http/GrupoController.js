@@ -2,6 +2,7 @@
 
 const Grupo = use('App/Models/Grupo')
 const UsuarioGrupo = use('App/Models/UsuarioGrupo')
+const ConversacionGrupo = use('App/Models/ConversacionGrupo')
 
 
 /**
@@ -100,7 +101,26 @@ class GrupoController {
    * Display a single grupo.
    * GET grupos/:id
    */
-  async show ({ params, request, response, view }) {
+
+  async conversacion({ params, request, response, auth }){
+    try{
+      var grupo = params.id;
+      if(await auth.check()){
+        let conv = ConversacionGrupo.query().where("fk_grupo",grupo).first();
+        if(conv){
+          return response.status(200).json(conv.conversacion);
+        }else{
+          return response.status(204).json([]);
+        }
+
+      }
+    }catch(error){
+      return response.status(400).json([]);
+    }
+  }
+  async show ({ params, request, response, auth }) {
+   
+
 
   }
 

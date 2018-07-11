@@ -156,12 +156,17 @@ export class HomeComponent implements OnInit {
   receivedMessage(data){
     for (let i = 0; i < this.users.length; i++) {
       const element = this.users[i];
-
       if(element.id == data.from){
         $("li#user_"+data.from).css({"background-color":"red"});
-
       }
-      
+    }
+  }
+  receivedMessageGroup(data){
+    for (let i = 0; i < this.groups.length; i++) {
+      const element = this.groups[i];
+      if(element.id == data.grupo){
+        $("li#grupo_"+data.grupo).css({"background-color":"red"});
+      }
     }
   }
 
@@ -201,10 +206,11 @@ export class HomeComponent implements OnInit {
     this.chat = this.ws.getSubscription("chat:global");
 
     this.chat.emit("connected",{userid:this.user.id});
-      this.chat.on('receive-message',(data) => {
-        console.log(data);
-        this.newMessage(data)
-      });
+
+    this.ws.getSubscription("chat:global").on('receive-message',(data) => {
+      console.log(data);
+      this.newMessage(data)
+    });
     console.log("WS: ",this.ws);
       
   }
@@ -224,6 +230,7 @@ export class HomeComponent implements OnInit {
 
     
     this.userSelected = user;
+    this.groupSelected = null;
     this.conversacion = []
     this.services.getConversation(user.id).subscribe(
       res=>{
@@ -243,6 +250,7 @@ export class HomeComponent implements OnInit {
     $("li").removeClass("active");
     $("li#grupo_"+grupo.id).addClass("active");
 
+
     $("div.messages > ul > li").remove();
     
     this.userSelected = null;
@@ -250,7 +258,18 @@ export class HomeComponent implements OnInit {
     this.conversacion = [];
 
     console.log("Grupo: ",grupo);
-    
+    this.services.getConversationGroup(grupo.id).subscribe(
+      res=>{
+        console.log("RES: ",res);
+        this.lastRequest = grupo.id;
+
+        this.conversacion = res;
+        console.log("CONVERSACION: ", this.conversacion);
+      },
+      error=>{
+        console.log("ERROR:",error);
+      }
+    );
 
 
 

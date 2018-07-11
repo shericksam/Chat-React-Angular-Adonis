@@ -29,3 +29,4 @@ Route.resource("/usuarios","UsuarioController");
 Route.resource('/conversacion','ConversacioneController');
 
 Route.resource("/grupos",'GrupoController');
+Route.get("/grupos/conversacion/:id",'GrupoController.conversacion');

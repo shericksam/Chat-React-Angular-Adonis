@@ -81,9 +81,12 @@ class ChatController {
     }
   }
 
-  saveMessageToGroup(data){
-    var conv = await ConversacionGrupo.query().where("fk_grupo",data.grupo).first();
-    
+  async saveMessageToGroup(data){
+    try{
+      var conv = await ConversacionGrupo.query().where("fk_grupo",data.grupo).first();
+    }catch(error){
+      throw error;
+    }
     if(conv == null){
       conv = new ConversacionGrupo();
       conv.fk_grupo = data.grupo;
