@@ -184,9 +184,7 @@ export class HomeComponent implements OnInit {
 
 
   sendMessage(){
-
-    this.notify({nombre:this.user.nombre,mensaje:this.mensaje});
-
+    
     if(this.mensaje && this.mensaje != ""){
       $('<li class="sent"><img src="http://emilcarlsson.se/assets/mikeross.png" alt="" /><p>' + this.mensaje + '</p></li>').appendTo($('.messages ul'));
       //$('.message-input input').val(null);
