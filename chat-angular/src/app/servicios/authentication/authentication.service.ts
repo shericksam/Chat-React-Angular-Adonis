@@ -17,8 +17,8 @@ export class AuthenticationService {
   private basePath = 'http://localhost:3333/api/v1/';
 
   login(loginObj: LoginObject): Observable<Session> {
-    console.log("JEJE");
-    console.log("login: ",loginObj);
+    // console.log("JEJE");
+    // console.log("login: ",loginObj);
     return this.http.post<any>(this.basePath + 'user/login', loginObj);
   }
   

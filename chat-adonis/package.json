@@ -25,7 +25,9 @@
     "@adonisjs/ignitor": "^2.0.6",
     "@adonisjs/lucid": "^5.0.4",
     "@adonisjs/websocket": "^1.0.10",
-    "pg": "^7.4.3"
+    "base64-img": "^1.0.4",
+    "pg": "^7.4.3",
+    "sqlite3": "^4.0.1"
   },
   "devDependencies": {},
   "autoload": {

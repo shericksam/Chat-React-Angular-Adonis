@@ -1,6 +1,8 @@
 'use strict'
 
-const Usuario = use('App/Models/User')
+const Usuario = use('App/Models/User');
+var base64Img = require('base64-img');
+
     /**
      * Resourceful controller for interacting with usuarios
      */
@@ -50,15 +52,24 @@ class UsuarioController {
 
     async store({ request, response ,auth }) {
 
-        const userInfo = request.only(['username', 'nombre', 'apellido', 'email', 'password'])
-        console.log("userinfooo: ",userInfo);
+        const userInfo = request.only(['username', 'nombre', 'apellido', 'email', 'password', 'foto'])
+        console.log("userinfooo: ", userInfo);
+        var namePhoto = userInfo.username.replace(" ", "");
+        if(userInfo.foto){
+            base64Img.img(userInfo.foto, 'usuarios', namePhoto, function(err, filepath) {
+                // console.log(filepath);
+            });
+        }else{
+            namePhoto = "default.png";
+        }
+
         const user = new Usuario()
         user.username = userInfo.username
         user.nombre = userInfo.nombre
         user.apellido = userInfo.apellido
         user.email = userInfo.email
         user.password = userInfo.password
-        user.foto = ""
+        user.foto = namePhoto;
 
         try {
             await user.save()
@@ -70,7 +81,14 @@ class UsuarioController {
                 token:us.token
             })
         } catch (error) {
-            return response.status(206).json({ data: error.detail })
+            console.log(error);
+            if(error.detail.includes("username"))
+                return response.status(400).json({ code: 2, message: error.detail })
+            if(error.detail.includes("email"))
+                return response.status(400).json({ code: 4, message: error.detail })
+
+            return response.status(400).json({ code: 1, message: "verifique" })
+
         }
     }
 

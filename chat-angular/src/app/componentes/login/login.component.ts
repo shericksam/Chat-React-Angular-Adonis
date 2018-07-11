@@ -37,11 +37,12 @@ export class LoginComponent implements OnInit {
       apellido: ['', Validators.required],
       email: ['', Validators.required],
       password: ['', Validators.required],
+      foto: ['']
     })
   }
 
   public submitLogin(): void {
-    console.log("EEEY");
+    // console.log("EEEY");
     this.submitted = true;
     this.error = null;
     if(this.loginForm.valid){
@@ -49,16 +50,12 @@ export class LoginComponent implements OnInit {
         data =>{ 
           this.correctLogin(data)
         },
-
         error => {
-          try{
-            console.log(error);
-            //this.error = JSON.parse(error._body)
-          }catch(error){
-            //console.log(error);
-          }
-          
-          
+          console.log(error.error[0]);
+          if(error.error[0].field == "email")
+            this.error = { code: 1, message: "No existe usuario con ese mail"};
+          if(error.error[0].field == "password")
+            this.error = { code: 2, message: "Contraseña invalida"};
         }
       )
     }
@@ -67,15 +64,17 @@ export class LoginComponent implements OnInit {
   public submitRegister(): void {
     this.submittedReg = true;
     this.error = null;
+    this.registerForm.value.foto = this.imagen;
     if(this.registerForm.valid){
       this.authenticationService.register(new RegisterObject(this.registerForm.value)).subscribe(
         data => {
           this.correctLogin(data)
+          // this.error = {code : 2, message : data.data };
           console.log("ESTO ES LA DATAAAA!!!!: ",data);
         },
         error => {
-          console.log("Error register: ",error);
-          //this.error = JSON.parse(error._body)
+          this.error = error.error;
+          // console.log("Error register: ",this.error);
         }
       )
     }
@@ -89,7 +88,7 @@ export class LoginComponent implements OnInit {
   }
 
   selectImage(input){
-    console.log(input);
+    // console.log(input);
     
     let dataArray = new FormData();
       dataArray.append('file', input.files[0]);
