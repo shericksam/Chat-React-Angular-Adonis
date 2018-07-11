@@ -2,7 +2,7 @@
 
 const Usuario = use('App/Models/User');
 var base64Img = require('base64-img');
-
+const Helpers = use('Helpers');
     /**
      * Resourceful controller for interacting with usuarios
      */
@@ -53,10 +53,10 @@ class UsuarioController {
     async store({ request, response ,auth }) {
 
         const userInfo = request.only(['username', 'nombre', 'apellido', 'email', 'password', 'foto'])
-        console.log("userinfooo: ", userInfo);
+        console.log("userinfooo: ", Helpers.publicPath());
         var namePhoto = userInfo.username.replace(" ", "");
         if(userInfo.foto){
-            base64Img.img(userInfo.foto, 'usuarios', namePhoto, function(err, filepath) {
+            base64Img.img(userInfo.foto, Helpers.publicPath(), namePhoto, function(err, filepath) {
                 // console.log(filepath);
             });
         }else{
