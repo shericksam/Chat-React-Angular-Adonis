@@ -43,6 +43,7 @@ export class HomeComponent implements OnInit {
   userSelected:Usuario;
   groupSelected:Grupo;
 
+  server:string = "http://192.168.43.67:3333/"
 
  
 
@@ -54,7 +55,7 @@ export class HomeComponent implements OnInit {
   ) {
     this.nombre = "Irving crespo"
     console.log("this.storageService.getCurrentSession", this.storageService.getCurrentSession().user.foto);
-    this.contactSelected = "http://127.0.0.1:3333/" + this.storageService.getCurrentSession().user.foto + ".jpg";
+    this.contactSelected = "http://192.168.43.67:3333/" + (this.storageService.getCurrentSession().user.foto?this.storageService.getCurrentSession().user.foto:"user") + ".jpg";
    }
 
   ngOnInit() {
@@ -77,7 +78,7 @@ export class HomeComponent implements OnInit {
         this.user = JSON.parse(localStorage.getItem("currentUser")).user;
         console.log("ID: ",this.user.id);
 
-        this.ws = Ws('ws://192.168.1.80:3333',{
+        this.ws = Ws('ws://192.168.43.67:3333',{
           query:{msg:'hi',userid:this.user.id},
           transport: {
             headers: { 'Cookie': 'foo=bar' }

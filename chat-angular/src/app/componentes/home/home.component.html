@@ -1,10 +1,9 @@
-
 <simple-notifications></simple-notifications>
 <div id="frame">
         <div id="sidepanel">
           <div id="profile">
             <div class="wrap">
-              <img id="profile-img" src="http://emilcarlsson.se/assets/mikeross.png" class="online" alt="" />
+              <img id="profile-img" [src]="contactSelected" class="online" alt="" />
               <p>{{user.nombre}} {{user.apellido}}</p>
               <i class="fa fa-chevron-down expand-button" aria-hidden="true"></i>
               <div id="status-options">
@@ -37,7 +36,7 @@
                                   <span class="checkmark"></span>
                               </label>
                               <span class="contact-status online"></span>
-                              <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
+                              <img src="{{server}}{{user.foto?user.foto:'user'}}.jpg" alt="" />
                               <div class="meta">
                                 <p class="name">{{user.nombre}} {{user.apellido}}</p>
                                 <p class="preview"></p>
@@ -71,7 +70,7 @@
               <li id="user_{{user.id}}" *ngFor="let user of users" (click)="selectContact(user)" class="contact">
                 <div class="wrap">
                   <span [ngClass]="{'contact-status online':user.conectado == true,'contact-status':1 == 1}"></span>
-                  <img src="http://emilcarlsson.se/assets/louislitt.png2"  alt="" />
+                  <img src="{{server}}{{user.foto?user.foto:'user'}}.jpg" alt="" />
                   <div class="meta">
                     <p class="name">{{user.nombre}} {{user.apellido}}</p>
                     <p class="preview"></p>
@@ -107,8 +106,8 @@
         
         <div class="content">
           <div class="contact-profile">
-            <img *ngIf="userSelected" src={{userSelected.foto}} alt=""/>
-            <p *ngIf="userSelected" >{{userSelected.nombre}}</p>
+            <img *ngIf="userSelected" src='{{server}}{{userSelected.foto?userSelected.foto:"user"}}.jpg' alt=""/>
+            <p *ngIf="userSelected" ><strong>{{userSelected.nombre}}{{userSelected.apellido}}</strong></p>
             <div class="social-media">
               <i class="fa fa-facebook" aria-hidden="true"></i>
               <i class="fa fa-twitter" aria-hidden="true"></i>
@@ -121,7 +120,7 @@
             <ul *ngIf="userSelected || groupSelected">
 
               <li *ngFor="let mensaje of conversacion" [ngClass]="{sent: mensaje.from == user.id,replies:mensaje.from != user.id}">
-                <img *ngIf="!groupSelected" src="http://emilcarlsson.se/assets/mikeross.png" alt="" />   
+                <img *ngIf="!groupSelected" src="{{server}}{{mensaje.foto}}.jpg" alt="" />   
                 <p>
                   <strong style="margin: 0" *ngIf="groupSelected">{{mensaje.nombre}}</strong>
                   <br>
