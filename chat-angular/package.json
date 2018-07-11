@@ -7,7 +7,9 @@
         "build": "ng build",
         "test": "ng test",
         "lint": "ng lint",
-        "e2e": "ng e2e"
+        "e2e": "ng e2e",
+        "electron": "electron .",
+         "electron-build": "ng build --prod && electron ."
     },
     "private": true,
     "dependencies": {
@@ -40,6 +42,7 @@
         "@types/node": "~8.9.4",
         "babel-plugin-transform-regenerator": "^6.26.0",
         "codelyzer": "~4.2.1",
+        "electron": "^2.0.4",
         "jasmine-core": "~2.99.1",
         "jasmine-spec-reporter": "~4.2.1",
         "karma": "~1.7.1",

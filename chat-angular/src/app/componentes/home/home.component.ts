@@ -83,9 +83,19 @@ export class HomeComponent implements OnInit {
           transport: {
             headers: { 'Cookie': 'foo=bar' }
           }
-        })
+        })  
+        try{
+          this.ws.connect()
+        }catch(error){
+          this.notifi.error("Error","no se puede conectar al servidor, revisa tu conexion",{
+            timeOut: 5000,
+            showProgressBar: true,
+            pauseOnHover: true,
+            clickToClose: false,
+            clickIconToClose: true
+          });
+        }
         
-        this.ws.connect()
         this.ws.on('open', () => {
           this.isConnected = true
           this.setupListeners();
@@ -93,7 +103,17 @@ export class HomeComponent implements OnInit {
         })
         this.ws.on('close', () => {
           this.isConnected = false
+          
         })
+        this.ws.on('error', () => {
+          this.notifi.error("Error","revisa tu conexion",{
+            timeOut: 5000,
+            showProgressBar: true,
+            pauseOnHover: true,
+            clickToClose: false,
+            clickIconToClose: true
+          });
+        });
         console.log("RESPUESTA: ",res);
       },
     error => {
