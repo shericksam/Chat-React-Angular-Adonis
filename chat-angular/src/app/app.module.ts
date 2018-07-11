@@ -16,7 +16,7 @@ import { RegistrationComponent } from './componentes/registration/registration.c
 
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { HttpInterceptorService } from './servicios/server/http-interceptor.service';
-
+import { SimpleNotificationsModule } from 'angular2-notifications';
 import {MatInputModule} from '@angular/material';
 
 @NgModule({
@@ -37,7 +37,8 @@ import {MatInputModule} from '@angular/material';
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
-    MatInputModule
+    MatInputModule,
+    SimpleNotificationsModule.forRoot()
   ],
   providers: [
     {

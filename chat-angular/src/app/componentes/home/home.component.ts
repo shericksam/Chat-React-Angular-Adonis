@@ -6,6 +6,7 @@ import Ws from '@adonisjs/websocket-client'
 import { ServiceApiService } from '../../servicios/server/service-api.service';
 import { map } from 'rxjs/operators';
 import { forEach } from '@angular/router/src/utils/collection';
+import {NotificationsService} from 'angular2-notifications'
 
 
 declare var jquery:any;
@@ -17,6 +18,7 @@ declare var $ :any;
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
+
   public user: Usuario;
 
   private users:Usuario[];
@@ -41,10 +43,14 @@ export class HomeComponent implements OnInit {
   userSelected:Usuario;
   groupSelected:Grupo;
 
+
+ 
+
   constructor(
     private storageService: StorageService,
     private authenticationService: AuthenticationService,
-    private services:ServiceApiService
+    private services:ServiceApiService,
+    private notifi:NotificationsService
   ) {
     this.nombre = "Irving crespo"
     this.contactSelected = "http://emilcarlsson.se/assets/harveyspecter.png";
@@ -93,6 +99,8 @@ export class HomeComponent implements OnInit {
     });
     
     
+  
+    
     
     this.user = this.storageService.getCurrentUser();
   }
@@ -103,30 +111,87 @@ export class HomeComponent implements OnInit {
   }
 
   newMessage(data){
-    this.receivedMessage(data);
-    $('<li class="replies"><img src="http://emilcarlsson.se/assets/mikeross.png" alt="" /><p>' + data.mensaje + '</p></li>').appendTo($('.messages ul'));
-    //$('.message-input input').val(null);
-    $('.contact.active .preview').html('<span>You: </span>' + data.mensaje);
-    $(".messages").animate({ scrollTop: $(document).height() }, "fast");
-    console.log("Mensaje: ",data.mensaje);
-    this.mensaje = ""
+    if(this.userSelected){
+      if(data.from == this.userSelected.id){
+        $('<li class="replies"><img src="http://emilcarlsson.se/assets/mikeross.png" alt="" /><p>' + data.mensaje + '</p></li>').appendTo($('.messages ul'));
+        //$('.message-input input').val(null);
+        $('.contact.active .preview').html('<span>'+data.nombre+': </span>' + data.mensaje);
+        this.scrollToBottom();
+        console.log("Mensaje: ",data.mensaje);
+        this.mensaje = ""
+      }else{
+        this.receivedMessage(data);
+        this.notify(data);
+      }
+    }else{
+      this.receivedMessage(data);
+      this.notify(data);
+    }
+      
   }
   newMessageFromGroup(data){
-    this.receivedMessageGroup(data);
-    $('<li class="replies"><p><strong style="margin: 0" *ngIf="groupSelected">'+data.nombre+'</strong>'
-    +'<br>' + data.mensaje + '</p></li>').appendTo($('.messages ul'));
-    //$('.message-input input').val(null);
-    $('.contact.active .preview').html('<span>You: </span>' + data.mensaje);
-    $(".messages").animate({ scrollTop: $(document).height() }, "fast");
-    console.log("Mensaje: ",data.mensaje);
-    this.mensaje = ""
+    if(this.groupSelected){
+      if(data.grupo == this.groupSelected.id){
+        $('<li class="replies"><p><strong style="margin: 0" *ngIf="groupSelected">'+data.nombre+'</strong>'
+        +'<br>' + data.mensaje + '</p></li>').appendTo($('.messages ul'));
+        //$('.message-input input').val(null);
+        $('.contact.active .preview').html('<span>You: </span>' + data.mensaje);
+        this.scrollToBottom();
+        console.log("Mensaje: ",data.mensaje);
+        this.mensaje = ""
+      }else{
+        this.receivedMessageGroup(data);
+        this.notify(data);
+      }
+    }else{
+      this.receivedMessageGroup(data);
+      this.notify(data);
+    }
+
+    
+    
   }
+
+  notify(data){
+    var template = "<li style='list-style-type: none;' class='contact'>\
+    <div  style='display:inline-block' class='wrap'>\
+        <span class='contact-status'></span>\
+        <img style='width:50px;height:50px;border-radius:50%' src='http://emilcarlsson.se/assets/louislitt.png'  />\
+        <div style='display:inline-block' class='meta'>\
+          <p style='display:inline' class='name'>"+data.nombre+": </p>\
+          <p style='display:inline' class='preview'>"+data.mensaje+"</p>\
+        </div>\
+      </div>\
+    </li>";
+    const toast = this.notifi.success("Nuevo mensaje",template,{
+      timeOut: 3000,
+      showProgressBar: true,
+      pauseOnHover: true,
+      clickToClose: false,
+      clickIconToClose: true
+    });
+    
+    toast.click.subscribe((event) => {
+      this.clickNotif(data);
+    });
+    
+  }
+
+  clickNotif(data){
+    console.log("Holiiii");
+
+  }
+
+
   sendMessage(){
+
+    this.notify({nombre:this.user.nombre,mensaje:this.mensaje});
+
     if(this.mensaje && this.mensaje != ""){
       $('<li class="sent"><img src="http://emilcarlsson.se/assets/mikeross.png" alt="" /><p>' + this.mensaje + '</p></li>').appendTo($('.messages ul'));
       //$('.message-input input').val(null);
-      $('.contact.active .preview').html('<span>You: </span>' + this.mensaje);
-      $(".messages").animate({ scrollTop: $(document).height() }, "fast");
+      $('.contact.active .preview').html('<span>Yo: </span>' + this.mensaje);
+      this.scrollToBottom();
       
       if(this.groupSelected != null){
         if(this.isConnected){
@@ -141,12 +206,14 @@ export class HomeComponent implements OnInit {
         }
       }else{
         if(this.isConnected){
-          console.log("****** LANZADO A USUARIO "+this.userSelected.id+" ************");
-          this.ws.getSubscription('chat:global').emit('newMessage',{
-            mensaje:this.mensaje,
-            from:this.user.id,
-            to:this.userSelected.id
-          });
+          if(this.userSelected){
+            console.log("****** LANZADO A USUARIO "+this.userSelected.id+" ************");
+            this.ws.getSubscription('chat:global').emit('newMessage',{
+              mensaje:this.mensaje,
+              from:this.user.id,
+              to:this.userSelected.id
+            });
+          }
         }else{
   
         }
@@ -250,10 +317,10 @@ export class HomeComponent implements OnInit {
 
   selectContact(user){
     $("li#user_"+user.id).css({"background-color":"#2c3e50"});
-
     $("li").removeClass("active");
-
     $("li#user_"+user.id).addClass("active");
+    
+    this.lastRequestG = 0
 
     if(this.lastRequest == user.id)
       return false;
@@ -271,6 +338,7 @@ export class HomeComponent implements OnInit {
         this.lastRequest = user.id;
         this.conversacion = res;
         console.log("CONVERSACION: ", this.conversacion);
+        this.scrollToBottom();
       },
       error=>{
         console.log("ERROR:",error);
@@ -283,8 +351,9 @@ export class HomeComponent implements OnInit {
     $("li#grupo_"+grupo.id).css({"background-color":"#2c3e50"});
     $("li").removeClass("active");
     $("li#grupo_"+grupo.id).addClass("active");
+    
 
-
+    this.lastRequest = 0
     if(this.lastRequestG == grupo.id)
       return false;
     $("div.messages > ul > li").remove();
@@ -300,6 +369,7 @@ export class HomeComponent implements OnInit {
         this.lastRequestG = grupo.id;
 
         this.conversacion = res;
+        this.scrollToBottom();
         console.log("CONVERSACION: ", this.conversacion);
       },
       error=>{
@@ -311,6 +381,12 @@ export class HomeComponent implements OnInit {
 
   }
 
+  scrollToBottom(){
+    var h = $(".messages").prop("scrollHeight");
+    console.log("Height: ",h);
+    console.log($(document).height());
+    $(".messages").animate({ scrollTop: h}, "fast");
+  }
 
   saveGroup(){
     console.log("save grupo");

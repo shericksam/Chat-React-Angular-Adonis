@@ -1,5 +1,5 @@
 
-
+<simple-notifications></simple-notifications>
 <div id="frame">
         <div id="sidepanel">
           <div id="profile">
@@ -71,7 +71,7 @@
               <li id="user_{{user.id}}" *ngFor="let user of users" (click)="selectContact(user)" class="contact">
                 <div class="wrap">
                   <span [ngClass]="{'contact-status online':user.conectado == true,'contact-status':1 == 1}"></span>
-                  <img src="http://emilcarlsson.se/assets/louislitt.png" alt="" />
+                  <img src="assets/user.png" style="background-image: url('assets/user.png')" alt="" />
                   <div class="meta">
                     <p class="name">{{user.nombre}} {{user.apellido}}</p>
                     <p class="preview"></p>
@@ -85,7 +85,7 @@
               <li id="grupo_{{grupo.id}}" *ngFor="let grupo of groups" (click)="selectGroup(grupo)" class="contact">
                 <div class="wrap">
                   <span></span>
-                  <img src="http://emilcarlsson.se/assets/louislitt.png" alt="" />
+                  <img src="assets/team.png" onerror="assets/team.png" alt="" />
                   <div class="meta">
                     <p class="name">{{grupo.nombre}}</p>
                     <p class="preview"></p>
