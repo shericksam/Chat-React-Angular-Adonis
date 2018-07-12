@@ -2,7 +2,9 @@
 
 const Grupo = use('App/Models/Grupo')
 const UsuarioGrupo = use('App/Models/UsuarioGrupo')
+const Usuario = use('App/Models/User')
 const ConversacionGrupo = use('App/Models/ConversacionGrupo')
+const Ws = use('Ws')
 
 
 /**
@@ -55,14 +57,15 @@ class GrupoController {
   async store ({ request, response }) {
 
     try{
-      var grupo = request.only(['users','nombre']);
-      console.log("Request G: ",request);
+      var grupo = request.only(['users','nombre','owner']);
       console.log("GRUPO: ",grupo);
       var ng = new Grupo();
       ng.nombre = grupo.nombre;
       ng.foto = "";
       await ng.save();
       var usersIn = [];
+
+
 
       for (let i = 0; i < grupo.users.length; i++) {
         const element = grupo.users[i];
@@ -71,16 +74,32 @@ class GrupoController {
           fk_grupo:ng.id
         });
       }
-      console.log("ARRAY: ",usersIn);
+      grupo.users.splice(grupo.users.indexOf(grupo.owner), 1);
+      let usersSid = await Usuario.query()
+      .table("users")
+      .select("sid")
+      .whereIn('id',grupo.users)
+      .fetch();
+      var sids = []
+
+      usersSid.rows.forEach(element => {
+        console.log("********** ELEMENTO ************");
+        console.log(element.toJSON().sid);
+        sids.push(element.toJSON().sid);
+      });
+
+      console.log("ARRAY: ",sids);
 
       try{
         if(ng){
           let usersCreated = await UsuarioGrupo.createMany(usersIn);
           console.log("USERS GRUPO: ",usersCreated);
+          Ws
+          .getChannel('chat:*')
+          .topic('chat:global')
+          .emitTo("new-group",ng,sids);
           
-          return response.status(200).json({
-            grupo:ng
-          });
+          return response.status(200).json(ng);
         }else{
           return response.status(400).json({
             msg:"No se hizo"

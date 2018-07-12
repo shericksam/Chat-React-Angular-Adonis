@@ -3,6 +3,7 @@
 const Usuario = use('App/Models/User');
 var base64Img = require('base64-img');
 const Helpers = use('Helpers');
+const Ws = use('Ws')
     /**
      * Resourceful controller for interacting with usuarios
      */
@@ -37,6 +38,12 @@ class UsuarioController {
         
         const us = await auth.attempt(user, pass);
         var usuario = await Usuario.query().where("email",user).first();
+
+        
+        Ws.getChannel('chat:*')
+            .topic('chat:global')
+            .broadcast("logged-user",usuario);
+        
         return response.json({
             user:usuario,
             token:us.token
@@ -76,7 +83,10 @@ class UsuarioController {
             await user.save()
             const us = await auth.attempt(userInfo.email, userInfo.password);
             //let user = auth.getUser();
-
+            Ws
+            .getChannel('chat:*')
+            .topic('chat:global')
+            .broadcast("new-user",user);
             return response.status(201).json({
                 user:user,
                 token:us.token

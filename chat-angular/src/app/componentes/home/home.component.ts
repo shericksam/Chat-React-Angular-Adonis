@@ -43,7 +43,7 @@ export class HomeComponent implements OnInit {
   public userSelected:Usuario;
   public groupSelected:Grupo;
 
-  public server:string = "http://192.168.43.67:3333/"
+  public server:string = "http://127.0.0.1:3333/"
 
  
 
@@ -55,7 +55,7 @@ export class HomeComponent implements OnInit {
   ) {
     this.nombre = "Irving crespo"
     console.log("this.storageService.getCurrentSession", this.storageService.getCurrentSession().user.foto);
-    this.contactSelected = "http://192.168.43.67:3333/" + (this.storageService.getCurrentSession().user.foto?this.storageService.getCurrentSession().user.foto:"user") + ".jpg";
+    this.contactSelected = "http://127.0.0.1:3333/" + (this.storageService.getCurrentSession().user.foto?this.storageService.getCurrentSession().user.foto:"user") + ".jpg";
    }
 
   ngOnInit() {
@@ -78,7 +78,7 @@ export class HomeComponent implements OnInit {
         this.user = JSON.parse(localStorage.getItem("currentUser")).user;
         console.log("ID: ",this.user.id);
 
-        this.ws = Ws('ws://192.168.43.67:3333',{
+        this.ws = Ws('ws://127.0.0.1:3333',{
           query:{msg:'hi',userid:this.user.id},
           transport: {
             headers: { 'Cookie': 'foo=bar' }
@@ -174,6 +174,33 @@ export class HomeComponent implements OnInit {
 
     
     
+  }
+
+  notifyAny(tittle,message,type){
+    var options = {
+      timeOut: 3000,
+      showProgressBar: true,
+      pauseOnHover: true,
+      clickToClose: false,
+      clickIconToClose: true
+    }
+    switch(type){
+      case "success":
+        this.notifi.success(tittle,message,options);
+        break;
+      case "error":
+        this.notifi.error(tittle,message,options);
+        break;
+      case "warn":
+        this.notifi.warn(tittle,message,options);
+        break;
+      case "bare":
+        this.notifi.bare(tittle,message,options);
+        break;
+      case "info":
+        this.notifi.info(tittle,message,options);
+        break;
+    }
   }
 
   notify(data){
@@ -274,16 +301,15 @@ export class HomeComponent implements OnInit {
     }
     console.log("Grupo: ",this.usersNewGroup);
     console.log("VALUE: ",event);
+
+    user.checked = event.target.checked;
+    //this.cleanCheckedUsers(false);
   }
 
   cleanCheckedUsers(checked){
     console.log("CLEAN: ");
-    
-    $("#checkeduser").removeAttr("checked");
-    $("#checkeduser").attr("visibility","invisible");
-    $("#checkeduser").attr("visibility","invisible");
-    $("#checkeduser").css({'background-color': '#eee'});
-    
+    $( "input[type='checkbox']" ).prop( "checked", false );
+    $("input[type='checkbox']").attr("checked","false");
   }
 
   setupListeners(){
@@ -299,7 +325,56 @@ export class HomeComponent implements OnInit {
       this.newMessage(data)
     });
 
+    this.ws.getSubscription("chat:global").on('new-group',(data) => {
+      if(!this.groups){
+        this.groups = []
+      }
+      
+      this.groups.forEach(element => {
+        if(element.id == data.id){
+          return true;
+          console.log("YA EXISTEEE");
+        } 
+      });
 
+      this.groups.push(data);
+      this.notifyAny("Nuevo grupo","te agregaron a un grupo","success");
+      this.ws.subscribe('chat:grupo'+data.id)
+        console.log("SUBSCRITO: ",'chat:grupo'+data.id);
+        this.ws.getSubscription("chat:grupo"+data.id).on('receive-message-group',(datax) => {
+          console.log("VAYA VAYA: ",datax);
+          this.newMessageFromGroup(datax)
+      })
+    });
+
+    this.ws.getSubscription("chat:global").on('new-user',(data) => {
+      if(!this.users){
+        this.users = []
+      }
+      this.users.push(data);
+      this.notifyAny("Nuevo usuario","un usuario se unio al chat","success");
+    });
+
+    this.ws.getSubscription("chat:global").on('logged-user',(data) => {
+      this.users.forEach(element => {
+        if(element.id == data.id){
+          element.conectado = true;
+        }
+      });
+      this.notifyAny(data.nombre+" inicio sesion","","info");
+    });
+
+    this.ws.getSubscription("chat:global").on('leave-user',(data) => {
+      this.users.forEach(element => {
+        if(element.id == data.id){
+          element.conectado = false;
+          this.notifyAny(data.nombre+" cerro sesion","","error");
+        }
+      });
+      
+    });
+
+    if(this.groups)
     this.groups.forEach(element => {
 
       (function(any){
@@ -311,13 +386,8 @@ export class HomeComponent implements OnInit {
           any.newMessageFromGroup(data)
         })
       })(this)
-      //f(this.ws,element);
-      //this.setListener(element);
     });
 
-    
-    console.log("WS: ",this.ws);
-      
   }
 
   setListener(id){
@@ -410,22 +480,53 @@ export class HomeComponent implements OnInit {
     $(".messages").animate({ scrollTop: h}, "fast");
   }
 
+  expandGrupos(){
+    if($("div#profile").hasClass("expanded")){
+      $("div#profile").removeClass("expanded");
+      $("div#contacts").removeClass("expanded");
+    }else{
+      $("div#profile").addClass("expanded");
+      $("div#contacts").addClass("expanded");
+    }
+   
+  }
+
   saveGroup(){
-    console.log("save grupo");
-    console.log("NAME G: ",this.nameGroup);
+    
+    
     if(this.usersNewGroup.length > 1){
       if(this.nameGroup != ""){
         this.usersNewGroup.push(this.user.id);
-        this.services.newGroup(this.usersNewGroup,this.nameGroup).subscribe(
+        this.services.newGroup(this.usersNewGroup,this.nameGroup,this.user.id).subscribe(
           res=>{
+
+            this.groups.forEach(element => {
+              if(element.id == res.id){
+                return true;
+                console.log("YA EXISTEEE");
+              } 
+            });
+
+            this.groups.push(res);
+            console.log("GRUPOO NUEVOO: ",res);
+
+            this.ws.subscribe("chat:grupo"+res.id);
+            this.ws.getSubscription("chat:grupo"+res.id).on("receive-message-group", (data)=>{
+              console.log("VAYA VAYA: ",data);
+              this.newMessageFromGroup(data);
+            });
             console.log("Creado!!!!! JEJE: ",res);
+            console.log("************* WS *******************");
+            console.log(this.ws);
           },
           error=>{
             console.log("ERROOOOR!!!!! JEJE: ",error);
           }
         );
-        this.usersNewGroup = []
+        this.usersNewGroup = [];
         this.cleanCheckedUsers(false);
+        this.expandGrupos();
+        this.nameGroup = ""
       }else{
         alert("Debes elegir un nombre");
       }
@@ -437,6 +538,7 @@ export class HomeComponent implements OnInit {
 
   public logout(): void{
     this.storageService.logout();
+    this.ws.close();
   }
 
 

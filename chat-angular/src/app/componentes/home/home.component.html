@@ -14,6 +14,7 @@
                   <li id="status-offline"><span class="status-circle"></span> <p>Offline</p></li>
                 </ul>
               </div>
+
               <div id="expanded">
                 
                 <h3>Crear grupo</h3>
@@ -26,27 +27,22 @@
                 display: inline-block;
                 font-size: 16px;" class="btn btn-success">Guardar</button>
 
-                <div style="overflow-y: scroll;height: auto;width: 300px;float: left; ">
-                    <ul style="height: auto;">
+                <div style="width: 300px;float: left;height:500px;">
+                    <ul  style="overflow: scroll;overflow-y: scroll; height:300px;overflow-x: hidden">
 
-                      <li style="list-style-type: none;padding-bottom: 10px;margin-bottom: 20px;bottom: 20px; height: auto;" class="contact" *ngFor="let user of users">
+                      <li style="list-style-type: none;padding-bottom: 10px;margin-bottom: 20px;bottom: 20px; " class="contact" *ngFor="let user of users">
                           <div class="" style="width:500px">
-                              <label style="display: inline-block;" class="container">
-                                  <input id="checkeduser" (change)="selectUserToGroup(user,$event)" type="checkbox" >
-                                  <span class="checkmark"></span>
-                              </label>
                               <span class="contact-status online"></span>
                               <img src="{{server}}{{user.foto?user.foto:'user'}}.jpg" alt="" />
                               <div class="meta">
                                 <p class="name">{{user.nombre}} {{user.apellido}}</p>
                                 <p class="preview"></p>
+                                <input (change)="selectUserToGroup(user,$event)" [attr.checked]="user.checked" style="width: 30px;height: 30px;" name="userss" id="checkeduser" type="checkbox" >
                               </div>
-                              
                             </div>
- 
-                      </li>
-                                        
-                      </ul>
+                      </li>  
+
+                    </ul>
                 </div>
                 
                 <!--
@@ -99,7 +95,7 @@
 
           
           <div id="bottom-bar">
-            <button id="addcontact"><i class="fa fa-user-plus fa-fw" aria-hidden="true"></i> <span>Crear grupo</span></button>
+            <button (click)="expandGrupos()" id="addcontact"><i class="fa fa-user-plus fa-fw" aria-hidden="true"></i> <span>Crear grupo</span></button>
             <button (click)="logout()" id="settings"><i class="fa fa-sign-out fa-fw" aria-hidden="true"></i> <span>Salir</span></button>
           </div>
         </div>

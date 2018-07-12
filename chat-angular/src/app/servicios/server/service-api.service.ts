@@ -7,21 +7,21 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 })
 export class ServiceApiService {
 
-  ep = "http://192.168.43.67:3333"
+  ep = "http://127.0.0.1:3333"
   constructor(private http:HttpClient) { }
 
   usersService(){
     return this.http.get<Usuario[]>(this.ep+"/usuarios",{});
   }
 
-  newGroup(users,name){
+  newGroup(users,name,owner){
     let par = new HttpParams();
     
     par.append("users",users);
     par.append("nombre",name);
     
     console.log("PARAMS: ",par);
-    return this.http.post(this.ep+"/grupos",{users:users,nombre:name});
+    return this.http.post<Grupo>(this.ep+"/grupos",{users:users,nombre:name,owner:owner});
   }
 
   getConversation(withUser:number){

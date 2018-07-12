@@ -37,7 +37,11 @@ class ChatController {
     var user = await User.find(this.socket.userid);
     if(user){
       user.conectado = false;
-      user.save();
+      await user.save();
+      Ws
+      .getChannel('chat:*')
+      .topic('chat:global')
+      .broadcast("leave-user",user);
     }
   }
 
