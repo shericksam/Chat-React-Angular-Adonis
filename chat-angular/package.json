@@ -1,6 +1,7 @@
 {
     "name": "chat-angular",
     "version": "0.0.0",
+    "main": "main.js",
     "scripts": {
         "ng": "ng",
         "start": "ng serve",
@@ -9,7 +10,7 @@
         "lint": "ng lint",
         "e2e": "ng e2e",
         "electron": "electron .",
-         "electron-build": "ng build --prod && electron ."
+        "electron-build": "ng build --prod && electron ."
     },
     "private": true,
     "dependencies": {
@@ -28,6 +29,7 @@
         "angular2-notifications": "^1.0.2",
         "babel-polyfill": "^6.26.0",
         "core-js": "^2.5.4",
+        "jquery": "^3.3.1",
         "ng-image-picker": "0.0.1",
         "rxjs": "^6.0.0",
         "zone.js": "^0.8.26"

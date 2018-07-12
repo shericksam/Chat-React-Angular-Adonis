@@ -21,29 +21,29 @@ export class HomeComponent implements OnInit {
 
   public user: Usuario;
 
-  private users:Usuario[];
-  private groups:Grupo[];
-  private conversacion:any[];
-  private listeners:any[];
+  public users:Usuario[];
+  public groups:Grupo[];
+  public conversacion:any[];
+  public listeners:any[];
   
   
-  mensaje:string;
-  title = 'app';
-  nombre:string;
-  idfake:number;
-  lastRequest:number;
-  lastRequestG:number;
-  usersNewGroup;
-  nameGroup:string;
-  ws;
+  public mensaje:string;
+  public title = 'app';
+  public nombre:string;
+  public idfake:number;
+  public lastRequest:number;
+  public lastRequestG:number;
+  public usersNewGroup;
+  public nameGroup:string;
+  public ws;
 
-  chat;
-  contactSelected:string;
-  isConnected = false;
-  userSelected:Usuario;
-  groupSelected:Grupo;
+  public chat;
+  public contactSelected:string;
+  public isConnected = false;
+  public userSelected:Usuario;
+  public groupSelected:Grupo;
 
-  server:string = "http://192.168.43.67:3333/"
+  public server:string = "http://192.168.43.67:3333/"
 
  
 
@@ -131,6 +131,8 @@ export class HomeComponent implements OnInit {
   connect(){
 
   }
+
+  
 
   newMessage(data){
     if(this.userSelected){
@@ -434,9 +436,7 @@ export class HomeComponent implements OnInit {
   }
 
   public logout(): void{
-    this.authenticationService.logout().subscribe(
-        response => {if(response) {this.storageService.logout();}}
-    );
+    this.storageService.logout();
   }
 
 

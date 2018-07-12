@@ -7,15 +7,18 @@ function createWindow () {
   win = new BrowserWindow({
     width: 600, 
     height: 600,
+    "web-preferences": {
+      "web-security": false
+    },
     backgroundColor: '#ffffff',
-    icon: `file://${__dirname}/dist/assets/logo.png`
+    icon: `file://${__dirname}/dist/chat-angular/assets/logo.png`
   })
 
 
-  win.loadURL(`file://${__dirname}/dist/index.html`)
+  win.loadURL(`file://${__dirname}/dist/chat-angular/index.html`)
 
   //// uncomment below to open the DevTools.
-  // win.webContents.openDevTools()
+  //win.webContents.openDevTools()
 
   // Event when the window is closed.
   win.on('closed', function () {

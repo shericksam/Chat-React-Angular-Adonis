@@ -27,6 +27,8 @@ export class StorageService {
 
   removeCurrentSession(): void {
     this.localStorageService.removeItem('currentUser');
+    this.localStorageService.removeItem('token');
+    this.localStorageService.removeItem('idMe');
     this.currentSession = null;
   }
 
