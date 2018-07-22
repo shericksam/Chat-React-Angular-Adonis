@@ -43,7 +43,7 @@ export class HomeComponent implements OnInit {
   public userSelected:Usuario;
   public groupSelected:Grupo;
 
-  public server:string = "http://127.0.0.1:3333/"
+  public server:string = "http://192.168.43.67:3333/"
 
  
 
@@ -55,7 +55,7 @@ export class HomeComponent implements OnInit {
   ) {
     this.nombre = "Irving crespo"
     console.log("this.storageService.getCurrentSession", this.storageService.getCurrentSession().user.foto);
-    this.contactSelected = "http://127.0.0.1:3333/" + (this.storageService.getCurrentSession().user.foto?this.storageService.getCurrentSession().user.foto:"user") + ".jpg";
+    this.contactSelected = this.server + (this.storageService.getCurrentSession().user.foto?this.storageService.getCurrentSession().user.foto:"user") + ".jpg";
    }
 
   ngOnInit() {
@@ -78,7 +78,7 @@ export class HomeComponent implements OnInit {
         this.user = JSON.parse(localStorage.getItem("currentUser")).user;
         console.log("ID: ",this.user.id);
 
-        this.ws = Ws('ws://127.0.0.1:3333',{
+        this.ws = Ws('ws://192.168.43.67:3333',{
           query:{msg:'hi',userid:this.user.id},
           transport: {
             headers: { 'Cookie': 'foo=bar' }
@@ -137,7 +137,7 @@ export class HomeComponent implements OnInit {
   newMessage(data){
     if(this.userSelected){
       if(data.from == this.userSelected.id){
-        $('<li class="replies"><img src="http://emilcarlsson.se/assets/mikeross.png" alt="" /><p>' + data.mensaje + '</p></li>').appendTo($('.messages ul'));
+        $('<li class="replies"><img src="'+this.server+"/"+data.foto+'.jpg" alt="" /><p>' + data.mensaje + '</p></li>').appendTo($('.messages ul'));
         //$('.message-input input').val(null);
         $('.contact.active .preview').html('<span>'+data.nombre+': </span>' + data.mensaje);
         this.scrollToBottom();
@@ -318,7 +318,7 @@ export class HomeComponent implements OnInit {
     this.ws.subscribe('chat:global')
     this.chat = this.ws.getSubscription("chat:global");
 
-    this.chat.emit("connected",{userid:this.user.id});
+    this.chat.emit("connected",{user:this.user});
 
     this.ws.getSubscription("chat:global").on('receive-message',(data) => {
       console.log(data);
@@ -333,7 +333,7 @@ export class HomeComponent implements OnInit {
       this.groups.forEach(element => {
         if(element.id == data.id){
           return true;
-          console.log("YA EXISTEEE");
+         
         } 
       });
 
@@ -358,17 +358,21 @@ export class HomeComponent implements OnInit {
     this.ws.getSubscription("chat:global").on('logged-user',(data) => {
       this.users.forEach(element => {
         if(element.id == data.id){
+          if(element.conectado == false){
           element.conectado = true;
+            this.notifyAny(data.nombre+" inicio sesion","","info");
+          }
         }
       });
-      this.notifyAny(data.nombre+" inicio sesion","","info");
     });
 
     this.ws.getSubscription("chat:global").on('leave-user',(data) => {
       this.users.forEach(element => {
         if(element.id == data.id){
-          element.conectado = false;
-          this.notifyAny(data.nombre+" cerro sesion","","error");
+          if(element.conectado == true){
+            element.conectado = false;
+            this.notifyAny(data.nombre+" cerro sesion","","error");
+          }
         }
       });
       
@@ -502,8 +506,9 @@ export class HomeComponent implements OnInit {
 
             this.groups.forEach(element => {
               if(element.id == res.id){
-                return true;
                 console.log("YA EXISTEEE");
+                return true;
+                
               } 
             });
 

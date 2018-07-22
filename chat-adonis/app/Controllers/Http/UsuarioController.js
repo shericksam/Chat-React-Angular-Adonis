@@ -39,10 +39,12 @@ class UsuarioController {
         const us = await auth.attempt(user, pass);
         var usuario = await Usuario.query().where("email",user).first();
 
-        
-        Ws.getChannel('chat:*')
+        if(Ws.getChannel('chat:*')
+        .topic('chat:global')){
+            Ws.getChannel('chat:*')
             .topic('chat:global')
             .broadcast("logged-user",usuario);
+        }
         
         return response.json({
             user:usuario,
@@ -68,7 +70,7 @@ class UsuarioController {
                 namePhoto = filepath;
             });
         }else{
-            namePhoto = "default.png";
+            namePhoto = "";
         }
 
         const user = new Usuario()
@@ -78,6 +80,7 @@ class UsuarioController {
         user.email = userInfo.email
         user.password = userInfo.password
         user.foto = namePhoto;
+        user.conectado = true;
 
         try {
             await user.save()

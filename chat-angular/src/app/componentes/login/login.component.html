@@ -1,4 +1,10 @@
 <div class="login-page">
+
+    <div style="display:flex; flex-direction: row; justify-content: center; align-items: center">
+        <img style="width: 30px;display: inline-block;" src="assets/wassap.png" alt="">
+        <h1 style="vertical-align:middle;" class="text-center">Guatzzapp</h1>
+    </div>
+
     <div class="form">
         <form class="register-form" *ngIf="crear" id="register-form" #lForm="ngForm" [formGroup]="registerForm" (ngSubmit)="submitRegister()" novalidate>
             <div *ngIf="!imagen" (click)="photoInput.click()" tabindex="0" class="el-upload el-upload--text">
