@@ -35,6 +35,7 @@ class UsuarioController {
     async login({request, auth, response }){
         var user = request.body.email;
         var pass = request.body.password;
+        console.log("res: ",user+" "+pass);
         
         const us = await auth.attempt(user, pass);
         var usuario = await Usuario.query().where("email",user).first();

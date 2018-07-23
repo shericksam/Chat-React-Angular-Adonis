@@ -6,7 +6,6 @@ export default class Panel extends React.Component {
     return (
       <View style={styles.container}>
         <Text>Open up fucking App.js to start working on your app!</Text>
-        
       </View>
     );
   }
