@@ -12,6 +12,8 @@ import {
 
 import LoginScreen from "./Views/login"
 import PanelScreen from "./Views/panel"
+import ChatScreen from "./Views/Chat"
+import ContactScreen from './Views/Contacts';
 //import AuthLoadingScreen from "./Views/loadingcheck"
 
 class AuthLoadingScreen extends React.Component {
@@ -38,9 +40,29 @@ class AuthLoadingScreen extends React.Component {
   }
 }
 
+const navigationOptions = {
+  headerStyle: { 
+    display: 'none' 
+  }
+};
+
 const AppStack = createStackNavigator({
-  Home: { screen: PanelScreen },
-  Panel: { screen: PanelScreen }
+  Home: { 
+    screen: PanelScreen, 
+    navigationOptions: navigationOptions
+  },
+  Chat: { 
+    screen: ChatScreen, 
+    navigationOptions: navigationOptions
+  },
+  Panel: { 
+    screen: PanelScreen, 
+    navigationOptions: navigationOptions
+  },
+  Contacts: {
+    screen: ContactScreen, 
+    navigationOptions: navigationOptions
+  }
 });
 
 const AuthStack = createStackNavigator({ 

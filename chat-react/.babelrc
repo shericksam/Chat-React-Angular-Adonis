@@ -1,5 +1,12 @@
 {
   "presets": ["babel-preset-expo"],
+  "plugins": [
+    ["transform-regenerator", {
+      "asyncGenerators": false,
+      "generators": false,
+      "async": false
+    }]
+  ],
   "env": {
     "development": {
       "plugins": ["transform-react-jsx-source"]

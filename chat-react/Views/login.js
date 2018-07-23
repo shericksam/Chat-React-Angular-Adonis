@@ -44,11 +44,16 @@ export default class LoginScreen extends React.Component {
       }),
     }).then((response) => response.json())
     .then((responseJson) => {
-      this.setState({isLoading:false});
-      this.setState({usuario:responseJson.user});
-      console.log("**************")
-      console.log(this.state.usuario.nombre)
-      this._signInAsync(responseJson.token);
+      if(responseJson.user){
+        // console.log("**************", responseJson)
+        this.setState({isLoading:false});
+        this.setState({usuario:responseJson.user});
+        console.log("**************")
+        console.log(this.state.usuario.nombre)
+        this._signInAsync(responseJson.token);
+      }else{
+        ToastAndroid.show('error '+ responseJson[0].message, ToastAndroid.SHORT);
+      }
       //console.log(responseJson);
     })
     .catch((error) => {
