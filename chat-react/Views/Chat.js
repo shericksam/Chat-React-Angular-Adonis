@@ -8,7 +8,8 @@ import {
   StyleSheet,
   YellowBox,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  AsyncStorage
 } from 'react-native';
 import { StackNavigator } from 'react-navigation';
 
@@ -24,6 +25,10 @@ const MESSAGES = [
 export default class Albums extends React.Component {
     constructor(props) {
         super(props);
+        this.state ={ 
+          isLoading: true,
+          mensajes: []
+        }
          YellowBox.ignoreWarnings(
           ['Warning: isMounted(...) is deprecated', 'Module RCTImageLoader'
         ]);
@@ -44,7 +49,8 @@ export default class Albums extends React.Component {
       var url = "http://192.168.1.113:3333";
       var token = await AsyncStorage.getItem('userToken');
       var me = await AsyncStorage.getItem('user');
-      // console.log(token)
+      me = JSON.parse(me);
+      console.log(this.state.user.id + "?me=" + me.id)
       return fetch(url+'/conversacion/' + this.state.user.id + "?me=" + me.id,{
         method: 'GET', 
         headers: {
@@ -66,21 +72,25 @@ export default class Albums extends React.Component {
           console.error(error);
         });
     }
-    
-  render() {
+  componentDidMount(){
     const { navigation } = this.props;
     var user = navigation.getParam('user');
     var nombreU =  user.nombre.charAt(0).toUpperCase() +  user.nombre.slice(1);
-    // this.setState({
-    //   user: user,
-    // });
-    // console.log(App);
+    this.setState({
+      user: user
+    });
+    // console.log(user);
     // const otherParam = navigation.getParam('otherParam', 'some default value');
-    setTimeout(function(){
-        this.props.navigation.setParams({Title: "       " + nombreU})
-        getConversation()
-    }.bind(this), 0);
+    
+    this.getConversation();
+    // setTimeout(function(){
+        this.props.navigation.setParams({Title: "       " + nombreU});
+    // }.bind(this), 1);
 
+  }
+
+  render() {
+    
     return (
       <KeyboardAvoidingView
       behavior={'padding'}
@@ -90,25 +100,21 @@ export default class Albums extends React.Component {
           style={styles.inverted}
           contentContainerStyle={styles.content}
         >
-          {MESSAGES.map((text, i) => {
+          {this.state.mensajes.map((text, i) => {
             const odd = i % 2;
-
             return (
               <View
                 key={i}
-                style={[odd ? styles.odd : styles.even, styles.inverted]}
-              >
+                style={[odd ? styles.odd : styles.even, styles.inverted]}>
                 <Image
                   style={styles.avatar}
                   source={
                     odd
                       ? require('../assets/avatar-2.png')
                       : require('../assets/avatar-1.png')
-                  }
-                />
+                  }/>
                 <View
-                  style={[styles.bubble, odd ? styles.received : styles.sent]}
-                >
+                  style={[styles.bubble, odd ? styles.received : styles.sent]}>
                   <Text style={odd ? styles.receivedText : styles.sentText}>
                     {text}
                   </Text>

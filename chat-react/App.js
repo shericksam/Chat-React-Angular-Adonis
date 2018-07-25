@@ -76,7 +76,10 @@ const AppStack = createStackNavigator({
 });
 
 const AuthStack = createStackNavigator({ 
-  Login: LoginScreen 
+  Login: { 
+    screen: LoginScreen, 
+    navigationOptions: navigationOptions
+  }, 
 });
 
 export default createSwitchNavigator(

@@ -17,11 +17,10 @@ export default class LoginScreen extends React.Component {
   } 
 
   onEnter(){
-    console.log("Fierro");
+    // console.log("Fierro");
     if(this.state.user != "" && this.state.pass != ""){
       this.setState({isLoading:true});
       this.login()
-
     }else{
       ToastAndroid.show('Llena los datos perro', ToastAndroid.SHORT);
     }
@@ -29,8 +28,7 @@ export default class LoginScreen extends React.Component {
   }
 
   login(){
-    const { navigate } = this.props.navigation;
-    
+    const { navigate } = this.props.navigation;   
 
     return fetch('http://192.168.1.113:3333/api/v1/user/login', {
       method: 'POST',
@@ -45,26 +43,26 @@ export default class LoginScreen extends React.Component {
     }).then((response) => response.json())
     .then((responseJson) => {
       this.setState({isLoading:false});
+      // console.log("**************", responseJson)
       if(responseJson.user){
-        // console.log("**************", responseJson)
         this.setState({usuario:responseJson.user});
         console.log("**************")
         console.log(this.state.usuario.nombre)
         this._signInAsync(responseJson.token, responseJson.user);
       }else{
-        ToastAndroid.show('error '+ responseJson[0].message, ToastAndroid.SHORT);
+        if(responseJson[0].message)
+          ToastAndroid.show('error '+ responseJson[0].message, ToastAndroid.SHORT);
       }
       //console.log(responseJson);
-    })
-    .catch((error) => {
+    }).catch((error) => {
       this.setState({isLoading:false});
       ToastAndroid.show('error '+error, ToastAndroid.SHORT);
       console.error(error);
-    });;
+    });
   }
   _signInAsync = async (token, user) => {
     await AsyncStorage.setItem('userToken',token);
-    await AsyncStorage.setItem('user', user);
+    await AsyncStorage.setItem('user', JSON.stringify(user));
     this.props.navigation.navigate('App');
   };
 
