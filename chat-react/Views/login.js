@@ -32,7 +32,7 @@ export default class LoginScreen extends React.Component {
     const { navigate } = this.props.navigation;
     
 
-    return fetch('http://192.168.1.80:3333/api/v1/user/login', {
+    return fetch('http://192.168.1.113:3333/api/v1/user/login', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -44,13 +44,13 @@ export default class LoginScreen extends React.Component {
       }),
     }).then((response) => response.json())
     .then((responseJson) => {
+      this.setState({isLoading:false});
       if(responseJson.user){
         // console.log("**************", responseJson)
-        this.setState({isLoading:false});
         this.setState({usuario:responseJson.user});
         console.log("**************")
         console.log(this.state.usuario.nombre)
-        this._signInAsync(responseJson.token);
+        this._signInAsync(responseJson.token, responseJson.user);
       }else{
         ToastAndroid.show('error '+ responseJson[0].message, ToastAndroid.SHORT);
       }
@@ -62,8 +62,9 @@ export default class LoginScreen extends React.Component {
       console.error(error);
     });;
   }
-  _signInAsync = async (token) => {
+  _signInAsync = async (token, user) => {
     await AsyncStorage.setItem('userToken',token);
+    await AsyncStorage.setItem('user', user);
     this.props.navigation.navigate('App');
   };
 

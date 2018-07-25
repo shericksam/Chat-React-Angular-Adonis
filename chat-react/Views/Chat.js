@@ -1,5 +1,3 @@
-/* @flow */
-
 import * as React from 'react';
 import {
   ScrollView,
@@ -8,7 +6,11 @@ import {
   Text,
   TextInput,
   StyleSheet,
+  YellowBox,
+  KeyboardAvoidingView,
+  Platform
 } from 'react-native';
+import { StackNavigator } from 'react-navigation';
 
 const MESSAGES = [
   'okay',
@@ -17,10 +19,73 @@ const MESSAGES = [
   'make me a sandwich',
 ];
 
+// import App from './../../App';
+
 export default class Albums extends React.Component {
+    constructor(props) {
+        super(props);
+         YellowBox.ignoreWarnings(
+          ['Warning: isMounted(...) is deprecated', 'Module RCTImageLoader'
+        ]);
+    }
+
+    static navigationOptions = ({ navigation }) => {
+        return {
+            title: navigation.getParam('Title', '       Chat'),
+            headerStyle: {
+                    backgroundColor: navigation.getParam('BackgroundColor', '#E040FB'),
+                },
+            headerTintColor: navigation.getParam('HeaderTintColor', '#fff')
+        };
+    };
+  
+  
+    async getConversation(){
+      var url = "http://192.168.1.113:3333";
+      var token = await AsyncStorage.getItem('userToken');
+      var me = await AsyncStorage.getItem('user');
+      // console.log(token)
+      return fetch(url+'/conversacion/' + this.state.user.id + "?me=" + me.id,{
+        method: 'GET', 
+        headers: {
+          Authorization: 'Bearer '+ token
+        },
+      })
+        .then((response) => response.json())
+        .then((responseJson) => {
+          console.log(responseJson)
+          this.setState({
+            isLoading: false,
+            mensajes: responseJson,
+          }, function(){
+  
+          });
+  
+        })
+        .catch((error) =>{
+          console.error(error);
+        });
+    }
+    
   render() {
+    const { navigation } = this.props;
+    var user = navigation.getParam('user');
+    var nombreU =  user.nombre.charAt(0).toUpperCase() +  user.nombre.slice(1);
+    // this.setState({
+    //   user: user,
+    // });
+    // console.log(App);
+    // const otherParam = navigation.getParam('otherParam', 'some default value');
+    setTimeout(function(){
+        this.props.navigation.setParams({Title: "       " + nombreU})
+        getConversation()
+    }.bind(this), 0);
+
     return (
-      <View style={styles.container}>
+      <KeyboardAvoidingView
+      behavior={'padding'}
+      keyboardVerticalOffset={Platform.select({ios: 0, android: 55})}
+      style={{flex: 1}}>
         <ScrollView
           style={styles.inverted}
           contentContainerStyle={styles.content}
@@ -54,14 +119,43 @@ export default class Albums extends React.Component {
         </ScrollView>
         <TextInput
           style={styles.input}
-          placeholder="Write a message"
+          placeholder="Escribe un mensaje"
           underlineColorAndroid="transparent"
         />
-      </View>
+        </KeyboardAvoidingView>
     );
   }
 }
 
+// export default ActivityProject = StackNavigator({
+//     First: { screen: Albums }
+// });
+
+// const RootStack = createStackNavigator(
+//     {
+//       Chat: Albums,
+//     },
+//     {
+//       initialRouteName: 'Chat',
+//       /* The header config from HomeScreen is now here */
+//       navigationOptions: {
+//         headerStyle: {
+//           backgroundColor: '#f4511e',
+//         },
+//         headerTintColor: '#fff',
+//         headerTitleStyle: {
+//           fontWeight: 'bold',
+//         },
+//       },
+//     }
+//   );
+  
+//   export default class App extends React.Component {
+//     render() {
+//       return <RootStack />;
+//     }
+//   }
+// const user;
 const styles = StyleSheet.create({
   container: {
     flex: 1,

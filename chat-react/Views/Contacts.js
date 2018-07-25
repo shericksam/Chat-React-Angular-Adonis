@@ -3,7 +3,9 @@
 import * as React from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, AsyncStorage,
   TouchableHighlight } from 'react-native';
-  import { createStackNavigator } from 'react-navigation';
+
+import { createStackNavigator, NavigationActions } from 'react-navigation';
+
 
 export default class Contacts extends React.Component {
   constructor(props){
@@ -13,7 +15,7 @@ export default class Contacts extends React.Component {
 
   _renderItem = ({ item }) => (
       <TouchableHighlight
-       onPress={() => navigation.navigate('Chat')}>
+       onPress={() => this.onPress(item)}>
         <View
           style={styles.item}>
           <View style={styles.avatar}>
@@ -29,15 +31,16 @@ export default class Contacts extends React.Component {
 
   onPress = (item) => {
     
-    this.props.navigation.push('Chat');
-    console.log("click", item)
+    // console.log("click", item)
+    this.props.route.navigation.navigate("Chat", { user: item })
+    // this.props.navigation.push('Chat');
   }
 
   _ItemSeparator = () => <View style={styles.separator} />;
 
   
   async componentDidMount(){
-    var url = "http://192.168.1.80:3333";
+    var url = "http://192.168.1.113:3333";
     var token = await AsyncStorage.getItem('userToken');
     // console.log(token)
     return fetch(url+'/usuarios',{
@@ -48,7 +51,7 @@ export default class Contacts extends React.Component {
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        console.log(responseJson)
+        // console.log(responseJson)
         this.setState({
           isLoading: false,
           contacts: responseJson,
@@ -64,8 +67,7 @@ export default class Contacts extends React.Component {
 
 
   render() {
-    // const { navigate } = this.props.navigation;
-
+    // console.log("this.props", this.props)
     if(this.state.isLoading){
       return(
         <View style={{flex: 1, padding: 20}}>
@@ -74,6 +76,7 @@ export default class Contacts extends React.Component {
       )
     }
 
+    
     return (
       <FlatList
         data={this.state.contacts}
@@ -84,6 +87,12 @@ export default class Contacts extends React.Component {
     );
   }
 }
+
+const navigateAction = NavigationActions.navigate({
+  routeName: 'Chat',
+  action: NavigationActions.navigate({routeName: 'Chat'}),
+  params: {},
+})
 
 const styles = StyleSheet.create({
   item: {

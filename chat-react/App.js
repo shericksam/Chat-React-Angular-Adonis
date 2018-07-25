@@ -14,18 +14,20 @@ import LoginScreen from "./Views/login"
 import PanelScreen from "./Views/panel"
 import ChatScreen from "./Views/Chat"
 import ContactScreen from './Views/Contacts';
+import CustomHeader from './Views/CustomHeader';
+
 //import AuthLoadingScreen from "./Views/loadingcheck"
 
 class AuthLoadingScreen extends React.Component {
   constructor(props) {
     super(props);
     this._bootstrapAsync();
+    console.ignoredYellowBox = ['Remote debugger'];
   }
 
   // Fetch the token from storage then navigate to our appropriate place
   _bootstrapAsync = async () => {
     const userToken = await AsyncStorage.getItem('userToken');
-
     this.props.navigation.navigate(userToken ? 'App' : 'Auth');
   };
 
@@ -45,6 +47,14 @@ const navigationOptions = {
     display: 'none' 
   }
 };
+const navigationOptionsCH = {
+  header: props => <CustomHeader {...props} />,
+  headerStyle: { 
+    backgroundColor: "transparent"
+  },
+  animationEnabled: true
+};
+
 
 const AppStack = createStackNavigator({
   Home: { 
@@ -52,8 +62,8 @@ const AppStack = createStackNavigator({
     navigationOptions: navigationOptions
   },
   Chat: { 
-    screen: ChatScreen, 
-    navigationOptions: navigationOptions
+    screen: ChatScreen,
+    navigationOptions: navigationOptionsCH
   },
   Panel: { 
     screen: PanelScreen, 
