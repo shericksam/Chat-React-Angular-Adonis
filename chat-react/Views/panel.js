@@ -2,16 +2,10 @@ import * as React from 'react';
 import { View, StyleSheet, Dimensions, AsyncStorage, StatusBar } from 'react-native';
 import { TabView, TabBar, SceneMap } from 'react-native-tab-view';
 
-import Chat from './Chat';
 import Contacts from './Contacts';
+import Groups from './Groups';
 import { createStackNavigator, NavigationActions } from 'react-navigation';
-
-const FirstRoute = () => (
-  <View style={[styles.container, { backgroundColor: '#ff4081' }]} />
-);
-const SecondRoute = () => (
-  <View style={[styles.container, { backgroundColor: '#673ab7' }]} />
-);
+import StaticComponent from './StaticComponent';
 
 const initialLayout = {
   height: 0,
@@ -23,10 +17,15 @@ export default class Panel extends React.Component {
     index: 0,
     routes: [
       { key: 'contacts', title: 'Usuarios', navigation: this.props.navigation },
-      { key: 'second', title: 'Grupos', navigation: this.props.navigation },
+      { key: 'groups', title: 'Grupos', navigation: this.props.navigation },
     ],
   };
- 
+  
+  async componentDidMount(){
+    var me = await AsyncStorage.getItem('user');
+    StaticComponent.me = me;
+  }
+
   render() {
     // console.log("this.props.navigation", this.props.navigation);
     
@@ -39,7 +38,7 @@ export default class Panel extends React.Component {
           navigationState={this.state}
           renderScene={ SceneMap({
             contacts: Contacts,
-            second: SecondRoute,
+            groups: Groups,
           })}
           onIndexChange={index => this.setState({ index })}
           initialLayout={initialLayout}

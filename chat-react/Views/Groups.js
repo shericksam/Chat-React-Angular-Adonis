@@ -5,36 +5,33 @@ import { View, Text, FlatList, StyleSheet, ActivityIndicator, AsyncStorage,
   TouchableHighlight } from 'react-native';
 
 import { createStackNavigator, NavigationActions } from 'react-navigation';
-import StaticComponent from './StaticComponent';
+import StaticComponent from "./StaticComponent";
 
-export default class Contacts extends React.Component {
+export default class Groups extends React.Component {
   constructor(props){
     super(props);
     this.state ={ isLoading: true }
-// newM // para mensajes nuevos
-    StaticComponent.chatGlobal = StaticComponent.ws.subscribe('chat:global');
-    StaticComponent.chatGlobal.emit("connected",{ user: StaticComponent.me.id });
   }
 
   _renderItem = ({ item }) => (
       <TouchableHighlight
        onPress={() => this.onPress(item)}>
         <View
-          style={ item.newM ? styles.itemM: styles.item}>
+          style={styles.item}>
           <View style={styles.avatar}>
             <Text style={styles.letter}>{item.nombre.slice(0, 1).toUpperCase()}</Text>
           </View>
           <View style={styles.details}>
             <Text style={styles.name}>{item.nombre}</Text>
-            <Text style={styles.number}>{item.mensaje ? item.mensaje : ""}</Text>
+            <Text style={styles.number}>{item.email}</Text>
           </View>
         </View>
         </TouchableHighlight>
   );
 
   onPress = (item) => {
-    // console.log("click", item)
-    item.groupSelected = false;
+    item.groupSelected = true;
+    // console.log("item", item)
     this.props.route.navigation.navigate("Chat", { user: item })
     // this.props.navigation.push('Chat');
   }
@@ -43,14 +40,10 @@ export default class Contacts extends React.Component {
 
   
   async componentDidMount(){
-    StaticComponent.chatGlobal.on('receive-message',(data) => {
-        console.log("SUBSCRITO: ", data);
-        this.newMessage(data);
-      });
     var url = "http://" + StaticComponent.url;
     var token = await AsyncStorage.getItem('userToken');
     // console.log(token)
-    return fetch(url+'/usuarios',{
+    return fetch(url + '/grupos',{
       method: 'GET', 
       headers: {
         Authorization: 'Bearer '+ token
@@ -62,43 +55,24 @@ export default class Contacts extends React.Component {
         this.setState({
           isLoading: false,
           contacts: responseJson,
-        }, function(){
-
         });
-
+        if(responseJson)
+            responseJson.forEach(element => {
+            (function(any){
+                StaticComponent.ws.subscribe('chat:grupo'+element.id)
+                console.log("SUBSCRITO: ",'chat:grupo'+element.id);
+                // StaticComponent.ws.getSubscription("chat:grupo"+element.id).on('receive-message-group',(data) => {
+                //     console.log("VAYA VAYA: ",data);
+                //     StaticComponent.ws.newMessageFromGroup(data)
+                // })
+            })(this)
+            });
       })
       .catch((error) =>{
         console.error(error);
       });
   }
 
-  newMessage(data){
-    var userInArray = this.state.contacts.find(x => x.id === data.from);
-    userInArray.newM = true;
-    userInArray.mensaje = data.mensaje;
-    console.log("userInArray", userInArray)
-    // this.state.contacts.forEach((element,i) => {
-    //   (function(any){
-    //       if(element.id == data.from){
-    var contacts = this.state.contacts;
-    this.setState({contacts:[]}, function(){
-      this.setState({
-        contacts: contacts,
-      });
-    });
-    setTimeout(function(){
-      userInArray.newM = false;
-      var contacts = this.state.contacts;
-      this.setState({contacts:[]}, function(){
-        this.setState({
-          contacts: contacts,
-        });
-      });
-    }.bind(this), 7000);
-    //       }
-    //   })(this)
-    // });
-  }
 
   render() {
     // console.log("this.props", this.props)
@@ -134,17 +108,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 8,
-  },
-  itemM:{
-    backgroundColor: 'gray',
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 8,
+    height: 70
   },
   avatar: {
-    height: 36,
-    width: 36,
-    borderRadius: 18,
+    height: 46,
+    width: 46,
+    borderRadius: 22,
     backgroundColor: '#e91e63',
     alignItems: 'center',
     justifyContent: 'center',
@@ -152,6 +121,7 @@ const styles = StyleSheet.create({
   letter: {
     color: 'white',
     fontWeight: 'bold',
+    fontSize: 20,
   },
   details: {
     margin: 8,

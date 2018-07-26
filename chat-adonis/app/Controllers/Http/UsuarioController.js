@@ -87,10 +87,10 @@ class UsuarioController {
             await user.save()
             const us = await auth.attempt(userInfo.email, userInfo.password);
             //let user = auth.getUser();
-            Ws
-            .getChannel('chat:*')
-            .topic('chat:global')
-            .broadcast("new-user",user);
+            // Ws
+            // .getChannel('chat:*')
+            // .topic('chat:global')
+            // .broadcast("new-user", user);
             return response.status(201).json({
                 user:user,
                 token:us.token

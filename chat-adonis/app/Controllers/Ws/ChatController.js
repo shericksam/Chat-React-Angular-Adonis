@@ -26,6 +26,7 @@ class ChatController {
   async onConnected(data){
     
     var user = await User.find(this.socket.userid);
+    console.log("user", user.id)
     if(user){
       user.conectado = true;
       user.sid = this.socket.id;

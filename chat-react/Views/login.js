@@ -2,6 +2,8 @@ import React from 'react';
 import { StyleSheet, Text, View,Image,
   Button,TextInput,KeyboardAvoidingView,
   ToastAndroid, ActivityIndicator,AsyncStorage } from 'react-native';
+  import Ws from '@adonisjs/websocket-client'
+  import StaticComponent from './StaticComponent';
 
 export default class LoginScreen extends React.Component {
   constructor(props) {
@@ -30,7 +32,7 @@ export default class LoginScreen extends React.Component {
   login(){
     const { navigate } = this.props.navigation;   
 
-    return fetch('http://192.168.1.113:3333/api/v1/user/login', {
+    return fetch('http://' + StaticComponent.url + '/api/v1/user/login', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -63,6 +65,16 @@ export default class LoginScreen extends React.Component {
   _signInAsync = async (token, user) => {
     await AsyncStorage.setItem('userToken',token);
     await AsyncStorage.setItem('user', JSON.stringify(user));
+    // if(userToken){
+    const ws = Ws('ws://' + StaticComponent.url, {
+      query:{ msg:'hi' , userid: user.id },
+      transport: {
+        headers: { 'Cookie': 'foo=bar' }
+      }
+    })
+    ws.connect()
+    StaticComponent.ws = ws;
+    // }
     this.props.navigation.navigate('App');
   };
 

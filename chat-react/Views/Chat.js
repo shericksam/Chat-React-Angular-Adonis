@@ -9,9 +9,11 @@ import {
   YellowBox,
   KeyboardAvoidingView,
   Platform,
-  AsyncStorage
+  AsyncStorage,
+  TouchableOpacity
 } from 'react-native';
 import { StackNavigator } from 'react-navigation';
+import StaticComponent from './StaticComponent';
 
 const MESSAGES = [
   'okay',
@@ -23,61 +25,89 @@ const MESSAGES = [
 // import App from './../../App';
 
 export default class Albums extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state ={ 
-          isLoading: true,
-          mensajes: []
-        }
-         YellowBox.ignoreWarnings(
-          ['Warning: isMounted(...) is deprecated', 'Module RCTImageLoader'
-        ]);
-    }
+  constructor(props) {
+      super(props);
+      this.state ={ 
+        isLoading: true,
+        isOnScreen: true,
+        mensajes: [],
+        mensaje: "",
+        groupSelected: false,
+        isConnected: true,
+        user: [],
+        me: [],
+      }
+        YellowBox.ignoreWarnings(
+        ['Warning: isMounted(...) is deprecated', 'Module RCTImageLoader'
+      ]);
+  }
 
-    static navigationOptions = ({ navigation }) => {
-        return {
-            title: navigation.getParam('Title', '       Chat'),
-            headerStyle: {
-                    backgroundColor: navigation.getParam('BackgroundColor', '#E040FB'),
-                },
-            headerTintColor: navigation.getParam('HeaderTintColor', '#fff')
-        };
-    };
-  
-  
-    async getConversation(){
-      var url = "http://192.168.1.113:3333";
-      var token = await AsyncStorage.getItem('userToken');
-      var me = await AsyncStorage.getItem('user');
-      me = JSON.parse(me);
-      console.log(this.state.user.id + "?me=" + me.id)
-      return fetch(url+'/conversacion/' + this.state.user.id + "?me=" + me.id,{
-        method: 'GET', 
-        headers: {
-          Authorization: 'Bearer '+ token
-        },
-      })
-        .then((response) => response.json())
-        .then((responseJson) => {
-          console.log(responseJson)
-          this.setState({
-            isLoading: false,
-            mensajes: responseJson,
-          }, function(){
-  
-          });
-  
-        })
-        .catch((error) =>{
-          console.error(error);
+  static navigationOptions = ({ navigation }) => {
+      return {
+          title: navigation.getParam('Title', '       Chat'),
+          headerStyle: {
+                  backgroundColor: navigation.getParam('BackgroundColor', '#E040FB'),
+              },
+          headerTintColor: navigation.getParam('HeaderTintColor', '#fff')
+      };
+  };
+
+
+  async getConversation(){
+    var url = "http://192.168.1.113:3333";
+    var token = await AsyncStorage.getItem('userToken');
+    var me = await AsyncStorage.getItem('user');
+    me = JSON.parse(me);
+    // console.log(this.state.user.id + "?me=" + me.id)
+    var urlConversation;
+    if(this.state.groupSelected)
+      urlConversation = url + "/grupos/conversacion/" + this.state.user.id;
+    else
+      urlConversation = url + '/conversacion/' + this.state.user.id + "?me=" + me.id;
+
+    return fetch(urlConversation,{
+      method: 'GET', 
+      headers: {
+        Authorization: 'Bearer '+ token
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        // console.log(responseJson)
+        this.setState({
+          isLoading: false,
+          mensajes: responseJson.reverse(),
+          me: me
         });
-    }
+
+      }).catch((error) =>{
+        console.error(error);
+      });
+  }
+
+  componentWillUnmount(){
+    console.log("this.state.isOnScreen", this.state.isOnScreen);
+    this.setState({
+      isOnScreen: false
+    });
+  }
+
   componentDidMount(){
+    StaticComponent.chatGlobal.on('receive-message', (data) => {
+      console.log(this.state.isOnScreen);
+      if(this.state.isOnScreen){
+        if(data.from == this.state.user.id){
+          this.newMessage(data);
+        }
+      }
+    });
     const { navigation } = this.props;
     var user = navigation.getParam('user');
+
     var nombreU =  user.nombre.charAt(0).toUpperCase() +  user.nombre.slice(1);
     this.setState({
-      user: user
+      user: user,
+      groupSelected: user.groupSelected
     });
     // console.log(user);
     // const otherParam = navigation.getParam('otherParam', 'some default value');
@@ -87,6 +117,57 @@ export default class Albums extends React.Component {
         this.props.navigation.setParams({Title: "       " + nombreU});
     // }.bind(this), 1);
 
+  }
+
+  newMessage(data){
+    var mensajes = this.state.mensajes;
+    mensajes.unshift(data);
+    
+    this.setState({mensajes:[]}, function(){
+      this.setState({
+        mensajes: mensajes,
+        mensaje: ''
+      });
+    });
+    
+  }
+
+  sendMessage = async () =>{
+    var data;
+    if(this.state.mensaje != ""){
+      if(this.state.groupSelected){
+        data = {
+          mensaje: this.state.mensaje,
+          from: this.state.me.id,
+          grupo: this.state.user.id
+        };
+        console.log("envio grupo", this.state.isConnected);
+        if(this.state.isConnected){
+          console.log("****** LANZADO A GRUPO "+this.state.user.id+" ************");
+          StaticComponent.ws.getSubscription('chat:grupo' + this.state.user.id).emit('newMessageToGroup', data);
+        }
+      }else{
+        console.log("envio user", this.state.isConnected);
+        data = {
+          mensaje:this.state.mensaje,
+          from:this.state.me.id,
+          to:this.state.user.id
+        };
+        if(this.state.isConnected){
+          console.log("****** LANZADO A USUARIO " + this.state.user.id + "************");
+          StaticComponent.ws.getSubscription('chat:global').emit('newMessage', data);
+        }
+      }
+      var mensajes = this.state.mensajes;
+      mensajes.unshift(data);
+      
+      this.setState({mensajes:[]}, function(){
+        this.setState({
+          mensajes: mensajes,
+          mensaje: ''
+        });
+      });
+    }    
   }
 
   render() {
@@ -100,8 +181,8 @@ export default class Albums extends React.Component {
           style={styles.inverted}
           contentContainerStyle={styles.content}
         >
-          {this.state.mensajes.map((text, i) => {
-            const odd = i % 2;
+          {this.state.mensajes.map((item, i) => {
+            const odd = item.from == this.state.me.id;
             return (
               <View
                 key={i}
@@ -116,18 +197,25 @@ export default class Albums extends React.Component {
                 <View
                   style={[styles.bubble, odd ? styles.received : styles.sent]}>
                   <Text style={odd ? styles.receivedText : styles.sentText}>
-                    {text}
+                    {item.mensaje}
                   </Text>
                 </View>
               </View>
             );
           })}
         </ScrollView>
-        <TextInput
-          style={styles.input}
-          placeholder="Escribe un mensaje"
-          underlineColorAndroid="transparent"
-        />
+        <View style={styles.footer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Escribe un mensaje"
+            underlineColorAndroid="transparent"
+            value={this.state.mensaje}
+            onChangeText={(mensaje) => this.setState({mensaje})}
+          />
+          <TouchableOpacity onPress={this.sendMessage}>
+            <Text style={styles.send}>Enviar</Text>
+          </TouchableOpacity>
+        </View>
         </KeyboardAvoidingView>
     );
   }
@@ -208,9 +296,21 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   input: {
-    height: 48,
+    paddingHorizontal: 20,
+    fontSize: 18,
+    flex: 1,
     paddingVertical: 12,
-    paddingHorizontal: 24,
     backgroundColor: 'white',
+  },
+  send: {
+    alignSelf: 'center',
+    color: 'lightseagreen',
+    fontSize: 18,
+    fontWeight: 'bold',
+    padding: 20,
+  },
+  footer: {
+    flexDirection: 'row',
+    backgroundColor: '#eee'
   },
 });
