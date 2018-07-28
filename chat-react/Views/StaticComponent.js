@@ -12,11 +12,19 @@ import {
     static isConnected = false;
     static chatGlobal = [];
     static me = [];
+    static token = "";
 
     constructor(props) {
       super(props);
     }
-  
+
+    clear(){
+      this.ws.close();
+      this.isConnected = false;
+      this.token = "";
+      this.chatGlobal = [];
+      this.me = [];
+    }
     componentDidMount() {
         // this.ws.on('open', () => {
         //     this.isConnected = true            

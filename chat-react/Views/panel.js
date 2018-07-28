@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, StyleSheet, Dimensions, AsyncStorage, StatusBar } from 'react-native';
+import { View, StyleSheet, Dimensions, AsyncStorage, StatusBar, DeviceEventEmitter } from 'react-native';
 import { TabView, TabBar, SceneMap } from 'react-native-tab-view';
 
 import Contacts from './Contacts';
@@ -18,53 +18,117 @@ const initialLayout = {
 export default class Panel extends React.Component {
   constructor(props){
     super(props);
-    this.state ={ 
-      dialogVisible: false
+    this.state = { 
+      dialogVisible: false,
     }
+  }
+  state = {
+    users: [],
+    groups: []
   }
   stateN = {
     index: 0,
     routes: [
-      { key: 'contacts', title: 'Usuarios', navigation: this.props.navigation },
-      { key: 'groups', title: 'Grupos', navigation: this.props.navigation },
+      { key: 'contacts', title: 'Usuarios', navigation: this.props.navigation, users: this.state.users },
+      { key: 'groups', title: 'Grupos', navigation: this.props.navigation, groups: this.state.groups },
     ],
   };
   
   async componentDidMount(){
     var me = await AsyncStorage.getItem('user');
-    StaticComponent.me = me;
+    var token = await AsyncStorage.getItem('userToken');
+    StaticComponent.me = JSON.parse(me);
+    StaticComponent.token = token;
+    console.log("StaticComponent.token",StaticComponent.token)
+    this.getContactsAll();
+    this.getGroupsAll();
   }
 
   nuevoGrupo(){
-    console.log("props")
+    // console.log("props")
     this.props.navigation.navigate("SelectUsers")
-  }
-
-  cerrarSesion(){
-    console.log("sesiooon")
-    this.setState({ dialogVisible: true });
   }
 
   handleCancel = () => {
     this.setState({ dialogVisible: false });
-  };
+  }
 
   handleYes = () => {
     // The user has pressed the "Delete" button, so here you can do your own logic.
     // ...Your logic
-    this.setState({ dialogVisible: false });
-  };
+    
+    // console.log("handleYes")
+    AsyncStorage.clear(()=>{
+      StaticComponent.clear();
+      this.setState({ dialogVisible: false });
+      // this.props.navigation.navigate("Login");
+    });
+  }
+  
+  getGroupsAll(){
+    var url = "http://" + StaticComponent.url;
+    var token = StaticComponent.token;
+    console.log(token);
+    return fetch(url + '/grupos',{
+      method: 'GET', 
+      headers: {
+        Authorization: 'Bearer '+ token
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        console.log("grup", responseJson)
+        this.setState({
+          groups: responseJson,
+        });
+        DeviceEventEmitter.emit('getGroups', this.state.groups);
+        
+      })
+      .catch((error) =>{
+        console.error(error);
+      });
+  
+  }
+
+  
+  getContactsAll(){
+    var url = "http://" + StaticComponent.url;
+    var token = StaticComponent.token;
+    // console.log("tokentokentokentokentoken", token)
+    return fetch(url+'/usuarios',{
+      method: 'GET', 
+      headers: {
+        Authorization: 'Bearer '+ token
+      },
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      // console.log("users", responseJson)
+      this.setState({
+        users: responseJson,
+      }, function(){
+        // console.log("this.state.users", this.state.users)
+      });
+      // this.stateN.routes.users = responseJson;
+      DeviceEventEmitter.emit('getUsers', this.state.users);
+      var stateN = this.stateN;
+      this.setState({stateN:[]}, function(){
+        this.setState({
+          stateN: stateN,
+        });
+      });
+    })
+    .catch((error) =>{
+      console.error(error);
+    });
+  }
 
   render() {
-    // console.log("this.props.navigation", this.props.navigation);
-    
-    
-    // const { navigate } = this.props.navigation;
     return (
       <View style={styles.container1}>
         <StatusBar barStyle="light-content" />
         <TabView
-          navigationState={this.stateN}
+          navigationState = { this.stateN }
           renderScene={ SceneMap({
             contacts: Contacts,
             groups: Groups,
@@ -79,7 +143,7 @@ export default class Panel extends React.Component {
           <ActionButton.Item buttonColor='#3498db' title="Nuevo Grupo" onPress={() => {this.nuevoGrupo()}}>
             <Icon name="md-people" style={styles.actionButtonIcon} />
           </ActionButton.Item>
-          <ActionButton.Item buttonColor='#1abc9c' title="Cerrar sesion" onPress={() => { this.cerrarSesion()}}>
+          <ActionButton.Item buttonColor='#1abc9c' title="Cerrar sesion" onPress={() => { this.setState({ dialogVisible: true }) }}>
             <Icon name="md-close" style={styles.actionButtonIcon} />
           </ActionButton.Item>
         </ActionButton>

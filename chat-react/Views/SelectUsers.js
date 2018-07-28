@@ -2,35 +2,44 @@
 
 import * as React from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, AsyncStorage,
-  TouchableHighlight, CheckBox } from 'react-native';
-
+  TouchableHighlight, Image, Alert } from 'react-native';
+// import { CheckBox } from 'react-native-elements'
 import { createStackNavigator, NavigationActions } from 'react-navigation';
 import StaticComponent from './StaticComponent';
+import FAB from 'react-native-fab';
+import Icon from 'react-native-vector-icons/Ionicons';
+import Dialog from "react-native-dialog";
 
 export default class Contacts extends React.Component {
   constructor(props){
     super(props);
-    this.state ={ isLoading: true, checked: [] }
+    this.state ={ 
+      isLoading: true, 
+      checked: [],
+      dialogVisible: false,
+      description: "",
+      nombreG: ""
+    }
    
   }
 
   _renderItem = ({ item, index }) => (
-      <TouchableHighlight>
+      <TouchableHighlight
+        onPress={() => this.onClick(item)}>
         <View
           style={ item.newM ? styles.itemM: styles.item}>
-          <View style={{flex: 1, padding: 10}}>
-          <CheckBox
-            center
-            title={item.name}
-            onPress={() => this.onClick(item)}
-        />  
+          <View>
+            <Image
+              style={styles.avatar}
+              source={ item.checked ?  require('../assets/sign-check-icon.png') : require('../assets/uncheck.png') }/>
           </View>
           <View style={styles.details}>
-            <Text style={styles.name}>{item.nombre}</Text>
+            <Text style={styles.name}>{item.nombre + " " + item.apellido}</Text>
           </View>  
         </View>
         </TouchableHighlight>
   );
+
   handleChange = (index) => {
       console.log(index);
     let { checked } = this.state;
@@ -40,24 +49,40 @@ export default class Contacts extends React.Component {
 
   onClick(item){
     var index;
-    
-    console.log("this.state.checked", this.state.checked);
-    var userInArray = this.state.checked.find((x,i) => {
-        if( x.id === item.id)
-            index = i;
-        return x.id === item.id
-    });
-    if(userInArray) {
-        this.state.checked.splice(index, 1);
+    let { checked } = this.state;    
+    let { contacts } = this.state;
+    console.log("this.state.checked", checked);
+    var userInArray = index = this.state.checked.indexOf(item.id);
+    var usuarioto = contacts.find(x => x.id === item.id);
+        console.log("userInArray", userInArray);
+    if(userInArray != -1) {
+      checked.splice(index, 1);        
+      usuarioto.checked = false;
     }else{
-        this.state.checked.push(item);
+      usuarioto.checked = true;
+      checked.push(item.id);
     }
 
-    console.log("this.state.checked", this.state.checked);
+    this.setState({contacts:[]}, function(){
+      this.setState({
+        contacts: contacts,
+      });
+    });
+    console.log("this.state.checkeddddd", this.state.contacts);
   }
 
   _ItemSeparator = () => <View style={styles.separator} />;
 
+  _showAlert = (mensaje) => {
+    Alert.alert(
+      'Verifica',
+      mensaje,
+      [
+        {text: 'OK', onPress: () => console.log('OK Pressed')},
+      ],
+      { cancelable: true }
+    )
+  }
   
   async componentDidMount(){    
     var url = "http://" + StaticComponent.url;
@@ -82,6 +107,94 @@ export default class Contacts extends React.Component {
       });
   }
 
+  showDialog = () => {
+    if(this.state.checked.length > 0){
+      this.setState({ dialogVisible: true });
+    }else{
+      this._showAlert('Aun no has seleccionado usuarios');
+    }
+  };
+
+  handleCancel = () => {
+    this.setState({ dialogVisible: false });
+  };
+
+  handleSave = () => {
+    // The user has pressed the "Delete" button, so here you can do your own logic.
+    // ...Your logic
+    if(this.state.nombreG != ""){
+      this.setState({ dialogVisible: false });
+    }else{
+      this._showAlert('Necesitas un nombre de grupo');
+    }
+
+  };
+
+  saveGroup(){
+    let url = StaticComponent.url;
+    let token = StaticComponent.me.token;
+    let { checked } = this.state;
+    checked.push(StaticComponent.me.id);
+
+
+        this.services.newGroup(this.usersNewGroup,this.nameGroup,this.user.id).subscribe(
+          res=>{
+
+            
+          },
+          error=>{
+            console.log("ERROOOOR!!!!! JEJE: ",error);
+          }
+        );
+        this.usersNewGroup = [];
+        this.cleanCheckedUsers(false);
+        this.expandGrupos();
+        this.nameGroup = ""
+
+    return fetch(url + '/grupos',{
+      method: 'GET', 
+      headers: {
+        Authorization: 'Bearer '+ token
+      },
+      body: JSON.stringify({
+        users: this.state.checked,
+        nombre: this.state.nombreG,
+        owner: StaticComponent.me.id}),
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        // console.log(responseJson)
+        this.groups.forEach(element => {
+          if(element.id == res.id){
+            console.log("YA EXISTEEE");
+            return true;
+            
+          } 
+        });
+
+        this.groups.push(res);
+        console.log("GRUPOO NUEVOO: ",res);
+
+        this.ws.subscribe("chat:grupo"+res.id);
+        this.ws.getSubscription("chat:grupo"+res.id).on("receive-message-group", (data)=>{
+          console.log("VAYA VAYA: ",data);
+          this.newMessageFromGroup(data);
+        });
+        console.log("Creado!!!!! JEJE: ",res);
+        console.log("************* WS *******************");
+        console.log(this.ws);
+
+
+        this.setState({
+          isLoading: false,
+          contacts: responseJson,
+        });
+      })
+      .catch((error) =>{
+        console.error(error);
+      });
+  }
+  
   render() {
     // console.log("this.props", this.props)
     if(this.state.isLoading){
@@ -94,12 +207,30 @@ export default class Contacts extends React.Component {
 
     
     return (
-      <FlatList
-        data={this.state.contacts}
-        keyExtractor={(item, i) => String(i)}
-        renderItem={this._renderItem}
-        ItemSeparatorComponent={this._ItemSeparator}
-      />
+      <View style={styles.container1}>
+        <FlatList
+          data={this.state.contacts}
+          keyExtractor={(item, i) => String(i)}
+          renderItem={this._renderItem}
+          ItemSeparatorComponent={this._ItemSeparator}
+        />
+        <Dialog.Container visible={ this.state.dialogVisible }>
+          <Dialog.Title>Nuevo Grupo</Dialog.Title>
+          <Dialog.Input 
+            label="Nombre del grupo" 
+            value={this.state.nombreG} 
+            onChangeText={(nombreG) => this.setState({nombreG})}
+          />
+          <Dialog.Button label="Cancelar" onPress={this.handleCancel} />
+          <Dialog.Button label="Guardar" onPress={this.handleSave} />
+        </Dialog.Container>
+        <FAB 
+          buttonColor="red" 
+          iconTextColor="#FFFFFF" 
+          onClickAction={() => { this.showDialog() }} 
+          visible={true} 
+          iconTextComponent={<Icon name="md-checkmark"/>} />
+      </View>
     );
   }
 }
@@ -112,6 +243,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 8,
   },
+  container1: {
+    flex: 1,
+    backgroundColor: '#ecf0f1',
+  },
   itemM:{
     backgroundColor: 'gray',
     flexDirection: 'row',
@@ -121,8 +256,6 @@ const styles = StyleSheet.create({
   avatar: {
     height: 36,
     width: 36,
-    borderRadius: 18,
-    backgroundColor: '#e91e63',
     alignItems: 'center',
     justifyContent: 'center',
   },

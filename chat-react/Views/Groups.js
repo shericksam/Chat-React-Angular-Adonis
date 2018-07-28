@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, AsyncStorage,
-  TouchableHighlight } from 'react-native';
+  TouchableHighlight, DeviceEventEmitter } from 'react-native';
 
 import { createStackNavigator, NavigationActions } from 'react-navigation';
 import StaticComponent from "./StaticComponent";
@@ -40,40 +40,20 @@ export default class Groups extends React.Component {
 
   
   async componentDidMount(){
-    var url = "http://" + StaticComponent.url;
-    var token = await AsyncStorage.getItem('userToken');
-    // console.log(token)
-    return fetch(url + '/grupos',{
-      method: 'GET', 
-      headers: {
-        Authorization: 'Bearer '+ token
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        // console.log(responseJson)
-        this.setState({
-          isLoading: false,
-          contacts: responseJson,
+    DeviceEventEmitter.addListener("getGroups", (groups) => {
+      this.setState({
+        isLoading: false,
+        contacts: groups,
+      });      
+      groups.forEach(element => {
+        StaticComponent.ws.subscribe('chat:grupo' + element.id);
+        StaticComponent.ws.getSubscription("chat:grupo" + element.id).on('receive-message-group',(data) => {
+          this.newMessageFromGroup(data);
         });
-        if(responseJson){
-            responseJson.forEach(element => {
-            // (function(any){
-                StaticComponent.ws.subscribe('chat:grupo' + element.id)
-                // console.log("SUBSCRITO: ",'chat:grupo' + element.id, this.state.isLoading);
-                StaticComponent.ws.getSubscription("chat:grupo" + element.id).on('receive-message-group',(data) => {
-                  // console.log("VAYA VAYA: ",data);
-                  this.newMessageFromGroup(data);
-                });
-            // })(this)
-            });
-
-            
-        }
-      })
-      .catch((error) =>{
-        console.error(error);
       });
+      console.log("vienen groups", groups);
+    })
+
   }
 
   newMessageFromGroup = async (data) => {

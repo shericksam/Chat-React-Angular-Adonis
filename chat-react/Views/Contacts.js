@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, AsyncStorage,
-  TouchableHighlight } from 'react-native';
+  TouchableHighlight, DeviceEventEmitter } from 'react-native';
 
 import { createStackNavigator, NavigationActions } from 'react-navigation';
 import StaticComponent from './StaticComponent';
@@ -44,32 +44,17 @@ export default class Contacts extends React.Component {
   
   async componentDidMount(){
     StaticComponent.chatGlobal.on('receive-message',(data) => {
-        console.log("SUBSCRITO: ", data);
-        this.newMessage(data);
+      console.log("SUBSCRITO: ", data);
+      this.newMessage(data);
+    });
+
+    DeviceEventEmitter.addListener("getUsers", (users) => {
+      this.setState({
+        isLoading: false,
+        contacts: users,
       });
-    var url = "http://" + StaticComponent.url;
-    var token = await AsyncStorage.getItem('userToken');
-    // console.log(token)
-    return fetch(url+'/usuarios',{
-      method: 'GET', 
-      headers: {
-        Authorization: 'Bearer '+ token
-      },
+      console.log("vienen users", users);
     })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        // console.log(responseJson)
-        this.setState({
-          isLoading: false,
-          contacts: responseJson,
-        }, function(){
-
-        });
-
-      })
-      .catch((error) =>{
-        console.error(error);
-      });
   }
 
   newMessage(data){
