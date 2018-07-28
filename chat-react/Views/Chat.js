@@ -14,13 +14,7 @@ import {
 } from 'react-native';
 import { StackNavigator } from 'react-navigation';
 import StaticComponent from './StaticComponent';
-
-const MESSAGES = [
-  'okay',
-  'sudo make me a sandwich',
-  'what? make it yourself',
-  'make me a sandwich',
-];
+import { BackHandler } from 'react-native';
 
 // import App from './../../App';
 
@@ -29,7 +23,7 @@ export default class Albums extends React.Component {
       super(props);
       this.state ={ 
         isLoading: true,
-        isOnScreen: true,
+        isOnScreen: false,
         mensajes: [],
         mensaje: "",
         groupSelected: false,
@@ -84,23 +78,15 @@ export default class Albums extends React.Component {
         console.error(error);
       });
   }
-
+  
   componentWillUnmount(){
-    console.log("this.state.isOnScreen", this.state.isOnScreen);
-    this.setState({
-      isOnScreen: false
-    });
+    this._mounted = false;
   }
 
   componentDidMount(){
-    StaticComponent.chatGlobal.on('receive-message', (data) => {
-      console.log(this.state.isOnScreen);
-      if(this.state.isOnScreen){
-        if(data.from == this.state.user.id){
-          this.newMessage(data);
-        }
-      }
-    });
+    this._mounted = true;
+    this.setState({isOnScreen: true});
+    
     const { navigation } = this.props;
     var user = navigation.getParam('user');
 
@@ -108,7 +94,23 @@ export default class Albums extends React.Component {
     this.setState({
       user: user,
       groupSelected: user.groupSelected
+    }, function(){
+      if(this.state.groupSelected){       
+        StaticComponent.ws.getSubscription('chat:grupo' + user.id).on('receive-message-group', (data) => {
+          console.log("grupo", data, this._mounted)
+          if(this._mounted)
+            if(data.grupo == this.state.user.id)
+              this.newMessage(data);
+        });
+      }else{
+        StaticComponent.chatGlobal.on('receive-message', (data) => {
+          if(this._mounted)
+            if(data.from == this.state.user.id)
+              this.newMessage(data);
+        });
+      }
     });
+
     // console.log(user);
     // const otherParam = navigation.getParam('otherParam', 'some default value');
     

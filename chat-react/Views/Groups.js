@@ -17,13 +17,13 @@ export default class Groups extends React.Component {
       <TouchableHighlight
        onPress={() => this.onPress(item)}>
         <View
-          style={styles.item}>
+          style={item.newM ? styles.itemM : styles.item }>
           <View style={styles.avatar}>
             <Text style={styles.letter}>{item.nombre.slice(0, 1).toUpperCase()}</Text>
           </View>
           <View style={styles.details}>
             <Text style={styles.name}>{item.nombre}</Text>
-            <Text style={styles.number}>{item.email}</Text>
+            <Text style={styles.number}>{item.mensaje ? item.mensaje : ""}</Text>
           </View>
         </View>
         </TouchableHighlight>
@@ -56,23 +56,48 @@ export default class Groups extends React.Component {
           isLoading: false,
           contacts: responseJson,
         });
-        if(responseJson)
+        if(responseJson){
             responseJson.forEach(element => {
-            (function(any){
-                StaticComponent.ws.subscribe('chat:grupo'+element.id)
-                console.log("SUBSCRITO: ",'chat:grupo'+element.id);
-                // StaticComponent.ws.getSubscription("chat:grupo"+element.id).on('receive-message-group',(data) => {
-                //     console.log("VAYA VAYA: ",data);
-                //     StaticComponent.ws.newMessageFromGroup(data)
-                // })
-            })(this)
+            // (function(any){
+                StaticComponent.ws.subscribe('chat:grupo' + element.id)
+                // console.log("SUBSCRITO: ",'chat:grupo' + element.id, this.state.isLoading);
+                StaticComponent.ws.getSubscription("chat:grupo" + element.id).on('receive-message-group',(data) => {
+                  // console.log("VAYA VAYA: ",data);
+                  this.newMessageFromGroup(data);
+                });
+            // })(this)
             });
+
+            
+        }
       })
       .catch((error) =>{
         console.error(error);
       });
   }
 
+  newMessageFromGroup = async (data) => {
+    var userInArray = this.state.contacts.find(x => x.id === data.grupo);
+    if(!userInArray) return;
+    userInArray.newM = true;
+    userInArray.mensaje = data.mensaje;
+    var contacts = this.state.contacts;
+    this.setState({contacts:[]}, function(){
+      this.setState({
+        contacts: contacts,
+      });
+    });
+    
+    setTimeout(function(){
+      userInArray.newM = false;
+      var contacts = this.state.contacts;
+      this.setState({contacts:[]}, function(){
+        this.setState({
+          contacts: contacts,
+        });
+      });
+    }.bind(this), 7000);
+  }
 
   render() {
     // console.log("this.props", this.props)
@@ -108,6 +133,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 8,
+    height: 70
+  },
+  itemM:{
+    backgroundColor: 'gray',
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,    
     height: 70
   },
   avatar: {

@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, AsyncStorage,
-  TouchableHighlight } from 'react-native';
+  TouchableHighlight, CheckBox } from 'react-native';
 
 import { createStackNavigator, NavigationActions } from 'react-navigation';
 import StaticComponent from './StaticComponent';
@@ -10,43 +10,56 @@ import StaticComponent from './StaticComponent';
 export default class Contacts extends React.Component {
   constructor(props){
     super(props);
-    this.state ={ isLoading: true }
-// newM // para mensajes nuevos
-    StaticComponent.chatGlobal = StaticComponent.ws.subscribe('chat:global');
-    StaticComponent.chatGlobal.emit("connected",{ user: StaticComponent.me.id });
+    this.state ={ isLoading: true, checked: [] }
+   
   }
 
-  _renderItem = ({ item }) => (
-      <TouchableHighlight
-       onPress={() => this.onPress(item)}>
+  _renderItem = ({ item, index }) => (
+      <TouchableHighlight>
         <View
           style={ item.newM ? styles.itemM: styles.item}>
-          <View style={styles.avatar}>
-            <Text style={styles.letter}>{item.nombre.slice(0, 1).toUpperCase()}</Text>
+          <View style={{flex: 1, padding: 10}}>
+          <CheckBox
+            center
+            title={item.name}
+            onPress={() => this.onClick(item)}
+        />  
           </View>
           <View style={styles.details}>
             <Text style={styles.name}>{item.nombre}</Text>
-            <Text style={styles.number}>{item.mensaje ? item.mensaje : ""}</Text>
-          </View>
+          </View>  
         </View>
         </TouchableHighlight>
   );
+  handleChange = (index) => {
+      console.log(index);
+    let { checked } = this.state;
+    checked[index] = !checked[index];
+    this.setState({ checked });
+  }
 
-  onPress = (item) => {
-    // console.log("click", item)
-    item.groupSelected = false;
-    this.props.route.navigation.navigate("Chat", { user: item })
-    // this.props.navigation.push('Chat');
+  onClick(item){
+    var index;
+    
+    console.log("this.state.checked", this.state.checked);
+    var userInArray = this.state.checked.find((x,i) => {
+        if( x.id === item.id)
+            index = i;
+        return x.id === item.id
+    });
+    if(userInArray) {
+        this.state.checked.splice(index, 1);
+    }else{
+        this.state.checked.push(item);
+    }
+
+    console.log("this.state.checked", this.state.checked);
   }
 
   _ItemSeparator = () => <View style={styles.separator} />;
 
   
-  async componentDidMount(){
-    StaticComponent.chatGlobal.on('receive-message',(data) => {
-        console.log("SUBSCRITO: ", data);
-        this.newMessage(data);
-      });
+  async componentDidMount(){    
     var url = "http://" + StaticComponent.url;
     var token = await AsyncStorage.getItem('userToken');
     // console.log(token)
@@ -62,43 +75,11 @@ export default class Contacts extends React.Component {
         this.setState({
           isLoading: false,
           contacts: responseJson,
-        }, function(){
-
         });
-
       })
       .catch((error) =>{
         console.error(error);
       });
-  }
-
-  newMessage(data){
-    var userInArray = this.state.contacts.find(x => x.id === data.from);
-    if(!userInArray) return;
-    userInArray.newM = true;
-    userInArray.mensaje = data.mensaje;
-    console.log("userInArray", userInArray)
-    // this.state.contacts.forEach((element,i) => {
-    //   (function(any){
-    //       if(element.id == data.from){
-    var contacts = this.state.contacts;
-    this.setState({contacts:[]}, function(){
-      this.setState({
-        contacts: contacts,
-      });
-    });
-    setTimeout(function(){
-      userInArray.newM = false;
-      var contacts = this.state.contacts;
-      this.setState({contacts:[]}, function(){
-        this.setState({
-          contacts: contacts,
-        });
-      });
-    }.bind(this), 7000);
-    //       }
-    //   })(this)
-    // });
   }
 
   render() {
@@ -123,11 +104,6 @@ export default class Contacts extends React.Component {
   }
 }
 
-const navigateAction = NavigationActions.navigate({
-  routeName: 'Chat',
-  action: NavigationActions.navigate({routeName: 'Chat'}),
-  params: {},
-})
 
 const styles = StyleSheet.create({
   item: {
@@ -165,6 +141,9 @@ const styles = StyleSheet.create({
   number: {
     fontSize: 12,
     color: '#999',
+  },
+  check:{
+    alignSelf: 'flex-end',
   },
   separator: {
     height: StyleSheet.hairlineWidth,

@@ -17,7 +17,7 @@ import ContactScreen from './Views/Contacts';
 import CustomHeader from './Views/CustomHeader';
 import Ws from '@adonisjs/websocket-client'
 import StaticComponent from './Views/StaticComponent';
-//import AuthLoadingScreen from "./Views/loadingcheck"
+import SelectUsersScreen from "./Views/SelectUsers"
 
 class AuthLoadingScreen extends React.Component {
   constructor(props) {
@@ -86,9 +86,11 @@ const AppStack = createStackNavigator({
     screen: PanelScreen, 
     navigationOptions: navigationOptions
   },
-  Contacts: {
-    screen: ContactScreen, 
-    navigationOptions: navigationOptions
+  SelectUsers: {
+    screen: SelectUsersScreen, 
+    navigationOptions: {
+      title: '      Nuevo grupo',
+    }
   }
 });
 
