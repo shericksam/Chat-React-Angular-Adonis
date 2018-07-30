@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, StyleSheet, Dimensions, AsyncStorage, StatusBar, DeviceEventEmitter } from 'react-native';
+import { View, StyleSheet, Dimensions, AsyncStorage, StatusBar, DeviceEventEmitter, YellowBox } from 'react-native';
 import { TabView, TabBar, SceneMap } from 'react-native-tab-view';
 
 import Contacts from './Contacts';
@@ -21,6 +21,9 @@ export default class Panel extends React.Component {
     this.state = { 
       dialogVisible: false,
     }
+    YellowBox.ignoreWarnings(
+      ['Warning: isMounted(...) is deprecated', 'Module RCTImageLoader'
+    ]);
   }
   state = {
     users: [],
@@ -35,18 +38,32 @@ export default class Panel extends React.Component {
   };
   
   async componentDidMount(){
+    DeviceEventEmitter.addListener("newGroup",(grupo)=>{
+      
+      this.state.groups.forEach(element => {
+        if(element.id == grupo.id){
+          // console.log("YA EXISTEEE");
+          return true;
+        } 
+      });
+      let { groups } = this.state;
+      groups.push(grupo);
+      this.setState({groups:[]}, function(){
+        this.setState(groups);
+      });
+      // console.log("GRUPOO NUEVOO: ----> ", groups);
+      DeviceEventEmitter.emit('addGroup', grupo);
+    });
     var me = await AsyncStorage.getItem('user');
     var token = await AsyncStorage.getItem('userToken');
     StaticComponent.me = JSON.parse(me);
     StaticComponent.token = token;
-    console.log("StaticComponent.token",StaticComponent.token)
     this.getContactsAll();
     this.getGroupsAll();
   }
 
   nuevoGrupo(){
-    // console.log("props")
-    this.props.navigation.navigate("SelectUsers")
+    this.props.navigation.navigate("SelectUsers");
   }
 
   handleCancel = () => {
@@ -57,18 +74,20 @@ export default class Panel extends React.Component {
     // The user has pressed the "Delete" button, so here you can do your own logic.
     // ...Your logic
     
+    // this.setState({ dialogVisible: false });
     // console.log("handleYes")
     AsyncStorage.clear(()=>{
       StaticComponent.clear();
-      this.setState({ dialogVisible: false });
-      // this.props.navigation.navigate("Login");
+      this.props.navigation.navigate("SignedOut");
+      
+
     });
   }
   
   getGroupsAll(){
     var url = "http://" + StaticComponent.url;
     var token = StaticComponent.token;
-    console.log(token);
+    // console.log(token);
     return fetch(url + '/grupos',{
       method: 'GET', 
       headers: {
@@ -77,12 +96,11 @@ export default class Panel extends React.Component {
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        console.log("grup", responseJson)
+        // console.log("grup", responseJson)
         this.setState({
           groups: responseJson,
         });
         DeviceEventEmitter.emit('getGroups', this.state.groups);
-        
       })
       .catch((error) =>{
         console.error(error);

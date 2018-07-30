@@ -2,8 +2,8 @@ import React from 'react';
 import { StyleSheet, Text, View,Image,
   Button,TextInput,KeyboardAvoidingView,
   ToastAndroid, ActivityIndicator,AsyncStorage } from 'react-native';
-  import Ws from '@adonisjs/websocket-client'
-  import StaticComponent from './StaticComponent';
+import Ws from '@adonisjs/websocket-client'
+import StaticComponent from './StaticComponent';
 
 export default class LoginScreen extends React.Component {
   constructor(props) {
@@ -78,8 +78,10 @@ export default class LoginScreen extends React.Component {
     this.props.navigation.navigate('App');
   };
 
-  componentDidMount(){
+  async componentDidMount(){
     
+    // var token = await AsyncStorage.getItem('userToken');
+    // console.log(token);
   }
 
 
@@ -92,51 +94,57 @@ export default class LoginScreen extends React.Component {
       )
     }
     return (
-      
-     
       <View style={styles.container}>
        
         <KeyboardAvoidingView 
          style={styles.container}
-         behavior="padding"
-        >
-         <Image style={{width:50,height: 50}}
-       source={require('../img/chatwhite.png')}
+         behavior="padding">
+          <Image style={{width:50,height: 50}}
+            source={require('../img/chatwhite.png')}
        // source={{uri:'https://facebook.github.io/react-native/docs/assets/favicon.png'}}
-        />
-        <Text style={styles.titleText} >
-          {this.state.titleText}{'\n'}{'\n'}
-        </Text>
-        <TextInput
-        style={{height: 40,width:150, borderColor: 'gray', 
-        borderWidth: 1,color:"white",padding:10,margin:10}}
-        onChangeText={(text) => this.setState({user:text})}
-        value={this.state.user}
-        underlineColorAndroid='transparent'
-        placeholder="usuario"
-        />
+          />
+          <Text style={styles.titleText} >
+            {this.state.titleText}{'\n'}{'\n'}
+          </Text>
+          <TextInput
+            style={{height: 40,width:150, borderColor: 'gray', 
+            borderWidth: 1,color:"white",padding:10,margin:10, backgroundColor:"white"}}
+            onChangeText={(text) => this.setState({user:text})}
+            value={this.state.user}
+            underlineColorAndroid='transparent'
+            placeholder="usuario"
+          />
         
-        <TextInput
-        style={{height: 40,width:150, borderColor: 'gray', 
-        borderWidth: 1,color:"white",padding:10,margin:10}}
-        onChangeText={(text) => this.setState({pass:text})}
-        value={this.state.pass}
-        underlineColorAndroid='transparent'
-        placeholder="password"
-        />
-        <Button
-          onPress={this.onEnter.bind(this)}
-          title="Entrar"
-          color="#0066ff"
-          accessibilityLabel="Learn more about this purple button"
-        />
+          <TextInput
+            style={{height: 40,width:150, borderColor: 'gray', 
+            borderWidth: 1,color:"white",padding:10,margin:10, backgroundColor:"white"}}
+            onChangeText={(text) => this.setState({pass:text})}
+            value={this.state.pass}
+            underlineColorAndroid='transparent'
+            placeholder="password"
+          />
+          <View style={{flexDirection:'column',
+              flex:.2,justifyContent:'space-between',}}>
+            <Button
+              style={{backgroundColor:'red',flex:2,}}
+              onPress={this.onEnter.bind(this)}
+              title="Entrar"
+              color="#4CAF50"
+              accessibilityLabel="Learn more about this purple button"
+            />
+            <Button
+              buttonStyle={{ marginTop: 20 }}
+              backgroundColor="transparent"
+              textStyle={{ color: "#bcbec1" }}
+              style={{flex:0.1}}
+              title="Crear Cuenta"
+              onPress={() => {
+                this.props.navigation.navigate("SignUp");
+              }}
+            />
+          </View>
         </KeyboardAvoidingView >
-        
-      
-
-     
-      </View>
-      
+      </View>      
     );
   }
 }
@@ -144,7 +152,7 @@ export default class LoginScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#76b852',
     alignItems: 'center',
     justifyContent: 'center',
   },

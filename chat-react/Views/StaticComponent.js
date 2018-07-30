@@ -18,8 +18,10 @@ import {
       super(props);
     }
 
-    clear(){
+    static clear(){
+      console.log("limpiar", this.ws);
       this.ws.close();
+      this.ws = null;
       this.isConnected = false;
       this.token = "";
       this.chatGlobal = [];

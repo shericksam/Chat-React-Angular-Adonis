@@ -18,6 +18,7 @@ import CustomHeader from './Views/CustomHeader';
 import Ws from '@adonisjs/websocket-client'
 import StaticComponent from './Views/StaticComponent';
 import SelectUsersScreen from "./Views/SelectUsers"
+import SignUpScreen from "./Views/SignUp"
 
 class AuthLoadingScreen extends React.Component {
   constructor(props) {
@@ -91,14 +92,21 @@ const AppStack = createStackNavigator({
     navigationOptions: {
       title: '      Nuevo grupo',
     }
-  }
+  },
+  SignedOut: {
+    screen: AuthLoadingScreen
+  },
 });
 
 const AuthStack = createStackNavigator({ 
   Login: { 
     screen: LoginScreen, 
     navigationOptions: navigationOptions
-  }, 
+  },
+  SignUp: { 
+    screen: SignUpScreen, 
+    navigationOptions: navigationOptions
+  },
 });
 
 export default createSwitchNavigator(

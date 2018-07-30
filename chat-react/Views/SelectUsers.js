@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, AsyncStorage,
-  TouchableHighlight, Image, Alert } from 'react-native';
+  TouchableHighlight, Image, Alert, DeviceEventEmitter } from 'react-native';
 // import { CheckBox } from 'react-native-elements'
 import { createStackNavigator, NavigationActions } from 'react-navigation';
 import StaticComponent from './StaticComponent';
@@ -51,10 +51,10 @@ export default class Contacts extends React.Component {
     var index;
     let { checked } = this.state;    
     let { contacts } = this.state;
-    console.log("this.state.checked", checked);
+    // console.log("this.state.checked", checked);
     var userInArray = index = this.state.checked.indexOf(item.id);
     var usuarioto = contacts.find(x => x.id === item.id);
-        console.log("userInArray", userInArray);
+        // console.log("userInArray", userInArray);
     if(userInArray != -1) {
       checked.splice(index, 1);        
       usuarioto.checked = false;
@@ -68,7 +68,7 @@ export default class Contacts extends React.Component {
         contacts: contacts,
       });
     });
-    console.log("this.state.checkeddddd", this.state.contacts);
+    // console.log("this.state.checkeddddd", this.state.contacts);
   }
 
   _ItemSeparator = () => <View style={styles.separator} />;
@@ -124,6 +124,7 @@ export default class Contacts extends React.Component {
     // ...Your logic
     if(this.state.nombreG != ""){
       this.setState({ dialogVisible: false });
+      this.saveGroup();
     }else{
       this._showAlert('Necesitas un nombre de grupo');
     }
@@ -131,64 +132,41 @@ export default class Contacts extends React.Component {
   };
 
   saveGroup(){
-    let url = StaticComponent.url;
-    let token = StaticComponent.me.token;
+    let url =  "http://" + StaticComponent.url;
+    let token = StaticComponent.token;
     let { checked } = this.state;
     checked.push(StaticComponent.me.id);
-
-
-        this.services.newGroup(this.usersNewGroup,this.nameGroup,this.user.id).subscribe(
-          res=>{
-
-            
-          },
-          error=>{
-            console.log("ERROOOOR!!!!! JEJE: ",error);
-          }
-        );
-        this.usersNewGroup = [];
-        this.cleanCheckedUsers(false);
-        this.expandGrupos();
-        this.nameGroup = ""
+    // console.log(JSON.stringify({
+    //   users: this.state.checked,
+    //   nombre: this.state.nombreG,
+    //   owner: StaticComponent.me.id
+    // }))
 
     return fetch(url + '/grupos',{
-      method: 'GET', 
+      method: 'POST', 
       headers: {
-        Authorization: 'Bearer '+ token
-      },
+        Authorization: 'Bearer '+ token,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },      
       body: JSON.stringify({
         users: this.state.checked,
         nombre: this.state.nombreG,
-        owner: StaticComponent.me.id}),
-    })
+        owner: StaticComponent.me.id
+      }),
+      })
       .then((response) => response.json())
-      .then((responseJson) => {
-        // console.log(responseJson)
-        this.groups.forEach(element => {
-          if(element.id == res.id){
-            console.log("YA EXISTEEE");
-            return true;
-            
-          } 
-        });
-
-        this.groups.push(res);
-        console.log("GRUPOO NUEVOO: ",res);
-
-        this.ws.subscribe("chat:grupo"+res.id);
-        this.ws.getSubscription("chat:grupo"+res.id).on("receive-message-group", (data)=>{
-          console.log("VAYA VAYA: ",data);
-          this.newMessageFromGroup(data);
-        });
-        console.log("Creado!!!!! JEJE: ",res);
-        console.log("************* WS *******************");
-        console.log(this.ws);
-
-
-        this.setState({
-          isLoading: false,
-          contacts: responseJson,
-        });
+      .then((response) => {
+        console.log(response);
+        DeviceEventEmitter.emit('newGroup', response);
+        Alert.alert(
+          'Se ha creado el grupo',
+          "Pueder revisar en tus grupos ",
+          [
+            {text: 'OK', onPress: () => this.props.navigation.goBack()},
+          ],
+          { cancelable: true }
+        );
       })
       .catch((error) =>{
         console.error(error);
@@ -196,6 +174,7 @@ export default class Contacts extends React.Component {
   }
   
   render() {
+    
     // console.log("this.props", this.props)
     if(this.state.isLoading){
       return(

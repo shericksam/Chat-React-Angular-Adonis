@@ -47,30 +47,31 @@ export default class Albums extends React.Component {
   };
 
 
-  async getConversation(){
-    var url = "http://192.168.1.113:3333";
-    var token = await AsyncStorage.getItem('userToken');
-    var me = await AsyncStorage.getItem('user');
-    me = JSON.parse(me);
-    // console.log(this.state.user.id + "?me=" + me.id)
+  getConversation(){
+    var url = "http://" + StaticComponent.url;
+    var token = StaticComponent.token;
+    let me = StaticComponent.me;
     var urlConversation;
+    // console.log("this.state.groupSelected",this.state.user);
     if(this.state.groupSelected)
       urlConversation = url + "/grupos/conversacion/" + this.state.user.id;
     else
       urlConversation = url + '/conversacion/' + this.state.user.id + "?me=" + me.id;
 
+      console.log(urlConversation)
     return fetch(urlConversation,{
       method: 'GET', 
       headers: {
-        Authorization: 'Bearer '+ token
+        Authorization: 'Bearer ' + token
       },
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        // console.log(responseJson)
+        console.log("responseJson", responseJson)
+        responseJson = responseJson ? responseJson.reverse() : responseJson;
         this.setState({
           isLoading: false,
-          mensajes: responseJson.reverse(),
+          mensajes: responseJson,
           me: me
         });
 
@@ -84,18 +85,17 @@ export default class Albums extends React.Component {
   }
 
   componentDidMount(){
-    this._mounted = true;
-    this.setState({isOnScreen: true});
-    
+    this._mounted = true;    
     const { navigation } = this.props;
     var user = navigation.getParam('user');
-
     var nombreU =  user.nombre.charAt(0).toUpperCase() +  user.nombre.slice(1);
+   
     this.setState({
       user: user,
       groupSelected: user.groupSelected
     }, function(){
-      if(this.state.groupSelected){       
+      // console.log(this.state.user)
+      if(this.state.groupSelected){
         StaticComponent.ws.getSubscription('chat:grupo' + user.id).on('receive-message-group', (data) => {
           console.log("grupo", data, this._mounted)
           if(this._mounted)
@@ -108,21 +108,21 @@ export default class Albums extends React.Component {
             if(data.from == this.state.user.id)
               this.newMessage(data);
         });
-      }
+      }      
+      this.getConversation();
     });
 
     // console.log(user);
     // const otherParam = navigation.getParam('otherParam', 'some default value');
     
-    this.getConversation();
     // setTimeout(function(){
-        this.props.navigation.setParams({Title: "       " + nombreU});
+    this.props.navigation.setParams({Title: "       " + nombreU});
     // }.bind(this), 1);
 
   }
 
   newMessage(data){
-    var mensajes = this.state.mensajes;
+    var { mensajes } = this.state;
     mensajes.unshift(data);
     
     this.setState({mensajes:[]}, function(){
@@ -185,6 +185,15 @@ export default class Albums extends React.Component {
         >
           {this.state.mensajes.map((item, i) => {
             const odd = item.from == this.state.me.id;
+            const miImagen = this.state.me.foto != "" ? 
+                  { uri: 'http://' + StaticComponent.url+ "/" + this.state.me.foto + ".jpg" } 
+                  : require('../assets/avatar-2.png');
+
+            var amigoImagen = item.foto != "" ? 
+                  { uri: 'http://' + StaticComponent.url+ "/" + item.foto + ".jpg" } 
+                  : require('../assets/avatar-1.png');
+
+                  console.log(miImagen, amigoImagen)
             return (
               <View
                 key={i}
@@ -193,8 +202,8 @@ export default class Albums extends React.Component {
                   style={styles.avatar}
                   source={
                     odd
-                      ? require('../assets/avatar-2.png')
-                      : require('../assets/avatar-1.png')
+                      ? miImagen
+                      : amigoImagen
                   }/>
                 <View
                   style={[styles.bubble, odd ? styles.received : styles.sent]}>

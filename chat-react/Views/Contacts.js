@@ -49,15 +49,25 @@ export default class Contacts extends React.Component {
     });
 
     DeviceEventEmitter.addListener("getUsers", (users) => {
+      if (this.isUnmounted) {
+        return;
+      }
       this.setState({
         isLoading: false,
         contacts: users,
       });
-      console.log("vienen users", users);
+      // console.log("vienen users", users);
     })
   }
 
+  componentWillUnmount() {
+    this.isUnmounted = true;
+  }
+
   newMessage(data){
+    if (this.isUnmounted) {
+      return;
+    }
     var userInArray = this.state.contacts.find(x => x.id === data.from);
     if(!userInArray) return;
     userInArray.newM = true;

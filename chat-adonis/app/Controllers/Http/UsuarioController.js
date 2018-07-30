@@ -63,7 +63,7 @@ class UsuarioController {
     async store({ request, response ,auth }) {
 
         const userInfo = request.only(['username', 'nombre', 'apellido', 'email', 'password', 'foto'])
-        console.log("userinfooo: ", Helpers.publicPath());
+        // console.log("userinfooo: ", request);
         var namePhoto = userInfo.username.replace(" ", "");
         if(userInfo.foto){
             base64Img.img(userInfo.foto, Helpers.publicPath(), namePhoto, function(err, filepath) {

@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, AsyncStorage,
-  TouchableHighlight, DeviceEventEmitter } from 'react-native';
+  TouchableHighlight, DeviceEventEmitter, Alert, YellowBox } from 'react-native';
 
 import { createStackNavigator, NavigationActions } from 'react-navigation';
 import StaticComponent from "./StaticComponent";
@@ -11,6 +11,13 @@ export default class Groups extends React.Component {
   constructor(props){
     super(props);
     this.state ={ isLoading: true }
+    YellowBox.ignoreWarnings(
+      ['Warning: isMounted(...) is deprecated', 'Module RCTImageLoader'
+    ]);
+  }
+
+  componentWillUnmount() {
+    this.isUnmounted = true;
   }
 
   _renderItem = ({ item }) => (
@@ -40,23 +47,94 @@ export default class Groups extends React.Component {
 
   
   async componentDidMount(){
+    if (this.isUnmounted) {
+      return;
+    }
+
     DeviceEventEmitter.addListener("getGroups", (groups) => {
+      if (this.isUnmounted) {
+        return;
+      }
       this.setState({
         isLoading: false,
         contacts: groups,
       });      
+      console.log(groups);
       groups.forEach(element => {
-        StaticComponent.ws.subscribe('chat:grupo' + element.id);
+        try{
+          StaticComponent.ws.subscribe('chat:grupo' + element.id);          
+        }catch(err){
+          return;
+        }
         StaticComponent.ws.getSubscription("chat:grupo" + element.id).on('receive-message-group',(data) => {
           this.newMessageFromGroup(data);
         });
       });
-      console.log("vienen groups", groups);
+      // console.log("vienen groups", groups);
     })
 
+    DeviceEventEmitter.addListener("addGroup", (group) => {
+      if (this.isUnmounted) {
+        return;
+      }
+      // console.log("vienen groups", group);
+      this.state.contacts.forEach(element => {
+        if(element.id == group.id){
+          console.log("YA EXISTEEE");
+          return true;
+        } 
+      });
+      let { contacts } = this.state;
+      // console.log("contacts", contacts);
+      // contacts.push(group)
+
+      this.setState({contacts:[]}, function(){
+        this.setState({
+          contacts: contacts,
+        });
+      });
+
+      StaticComponent.ws.subscribe('chat:grupo' + group.id);
+      StaticComponent.ws.getSubscription("chat:grupo" + group.id).on('receive-message-group',(data) => {
+        this.newMessageFromGroup(data);
+      });
+      
+    })
+    StaticComponent.ws.getSubscription("chat:global").on('new-group',(data) => {
+      if (this.isUnmounted) {
+        return;
+      }
+
+      let { contacts } = this.state;
+      // console.log("contacts", contacts);
+      contacts.push(data)
+
+      this.setState({contacts:[]}, function(){
+        this.setState({
+          contacts: contacts,
+        });
+      });
+      StaticComponent.ws.subscribe('chat:grupo' + data.id);
+      StaticComponent.ws.getSubscription("chat:grupo" + data.id).on('receive-message-group',(data) => {
+        this.newMessageFromGroup(data);
+      });
+      
+      Alert.alert(
+        'Aviso',
+        "Te han agregado a el grupo "+ data.nombre,
+        [
+          {text: 'OK', onPress: () => console.log('OK Pressed')},
+        ],
+        { cancelable: true }
+      )
+    });
   }
 
   newMessageFromGroup = async (data) => {
+    if (this.isUnmounted) {
+      return;
+    }
+
     var userInArray = this.state.contacts.find(x => x.id === data.grupo);
     if(!userInArray) return;
     userInArray.newM = true;
@@ -69,6 +147,9 @@ export default class Groups extends React.Component {
     });
     
     setTimeout(function(){
+      if (this.isUnmounted) {
+        return;
+      }
       userInArray.newM = false;
       var contacts = this.state.contacts;
       this.setState({contacts:[]}, function(){
