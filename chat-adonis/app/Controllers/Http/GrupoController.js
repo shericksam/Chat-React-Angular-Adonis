@@ -132,7 +132,7 @@ class GrupoController {
         if(conv){
           return response.status(200).json(conv.conversacion);
         }else{
-          return response.status(204).json([]);
+          return response.status(200).json([]);
         }
 
       }

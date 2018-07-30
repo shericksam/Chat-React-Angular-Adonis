@@ -7,7 +7,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 })
 export class ServiceApiService {
 
-  ep = "http://192.168.1.113:3333"
+  ep = "http://192.168.1.83:3333"
   constructor(private http:HttpClient) { }
 
   usersService(){

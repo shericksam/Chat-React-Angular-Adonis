@@ -108,7 +108,7 @@ export default class LoginScreen extends React.Component {
           </Text>
           <TextInput
             style={{height: 40,width:150, borderColor: 'gray', 
-            borderWidth: 1,color:"white",padding:10,margin:10, backgroundColor:"white"}}
+            borderWidth: 1,color:"black",padding:10,margin:10, backgroundColor:"white"}}
             onChangeText={(text) => this.setState({user:text})}
             value={this.state.user}
             underlineColorAndroid='transparent'
@@ -117,7 +117,7 @@ export default class LoginScreen extends React.Component {
         
           <TextInput
             style={{height: 40,width:150, borderColor: 'gray', 
-            borderWidth: 1,color:"white",padding:10,margin:10, backgroundColor:"white"}}
+            borderWidth: 1,color:"black",padding:10,margin:10, backgroundColor:"white"}}
             onChangeText={(text) => this.setState({pass:text})}
             value={this.state.pass}
             underlineColorAndroid='transparent'

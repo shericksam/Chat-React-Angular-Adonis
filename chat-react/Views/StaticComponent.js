@@ -8,7 +8,7 @@ import {
 
  class StaticComponent extends Component {
     static ws = null;
-    static url = "192.168.1.113:3333";
+    static url = "192.168.1.83:3333";
     static isConnected = false;
     static chatGlobal = [];
     static me = [];

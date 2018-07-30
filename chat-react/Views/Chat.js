@@ -52,13 +52,13 @@ export default class Albums extends React.Component {
     var token = StaticComponent.token;
     let me = StaticComponent.me;
     var urlConversation;
-    // console.log("this.state.groupSelected",this.state.user);
+    // console.log("this.state.groupSelected",this.state.groupSelected);
     if(this.state.groupSelected)
       urlConversation = url + "/grupos/conversacion/" + this.state.user.id;
     else
       urlConversation = url + '/conversacion/' + this.state.user.id + "?me=" + me.id;
 
-      console.log(urlConversation)
+      // console.log(urlConversation)
     return fetch(urlConversation,{
       method: 'GET', 
       headers: {
@@ -68,6 +68,7 @@ export default class Albums extends React.Component {
       .then((response) => response.json())
       .then((responseJson) => {
         console.log("responseJson", responseJson)
+        responseJson = responseJson ? responseJson : [];
         responseJson = responseJson ? responseJson.reverse() : responseJson;
         this.setState({
           isLoading: false,
@@ -89,12 +90,12 @@ export default class Albums extends React.Component {
     const { navigation } = this.props;
     var user = navigation.getParam('user');
     var nombreU =  user.nombre.charAt(0).toUpperCase() +  user.nombre.slice(1);
-   
+    
     this.setState({
       user: user,
       groupSelected: user.groupSelected
     }, function(){
-      // console.log(this.state.user)
+      // console.log(this.state.groupSelected)
       if(this.state.groupSelected){
         StaticComponent.ws.getSubscription('chat:grupo' + user.id).on('receive-message-group', (data) => {
           console.log("grupo", data, this._mounted)
