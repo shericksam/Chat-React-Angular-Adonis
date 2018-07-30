@@ -120,6 +120,7 @@ export default class LoginScreen extends React.Component {
             borderWidth: 1,color:"black",padding:10,margin:10, backgroundColor:"white"}}
             onChangeText={(text) => this.setState({pass:text})}
             value={this.state.pass}
+            secureTextEntry={true}
             underlineColorAndroid='transparent'
             placeholder="password"
           />

@@ -8,7 +8,7 @@ import {
 
  class StaticComponent extends Component {
     static ws = null;
-    static url = "192.168.1.83:3333";
+    static url = "192.168.43.43:3333";
     static isConnected = false;
     static chatGlobal = [];
     static me = [];
@@ -20,7 +20,8 @@ import {
 
     static clear(){
       console.log("limpiar", this.ws);
-      this.ws.close();
+      if(this.ws)
+        this.ws.close();
       this.ws = null;
       this.isConnected = false;
       this.token = "";
