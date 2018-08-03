@@ -43,7 +43,7 @@ export class HomeComponent implements OnInit {
   public userSelected:Usuario;
   public groupSelected:Grupo;
 
-  public server:string = "http://192.168.1.83:3333/"
+  public server:string = "http://192.168.43.43:3333/"
 
  
 
@@ -78,7 +78,7 @@ export class HomeComponent implements OnInit {
         this.user = JSON.parse(localStorage.getItem("currentUser")).user;
         console.log("ID: ",this.user.id);
 
-        this.ws = Ws('ws://192.168.1.83:3333',{
+        this.ws = Ws('ws://192.168.43.43:3333',{
           query:{msg:'hi',userid:this.user.id},
           transport: {
             headers: { 'Cookie': 'foo=bar' }
